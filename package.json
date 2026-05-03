@@ -1,0 +1,28 @@
+{
+  "name": "hubble-diagram",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "build:embed": "tsc --noEmit && vite build --config vite.embed.config.ts",
+    "build:data": "tsx scripts/build-data.ts",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "deploy": "npm run build && firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "d3": "^7.9.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/node": "^22.5.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^2.1.4"
+  }
+}

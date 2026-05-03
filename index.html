@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Hubble Diagram</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.css"
+    />
+    <script
+      src="https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js"
+      charset="utf-8"
+    ></script>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <div>
+          <h1>Interactive Hubble Diagram</h1>
+          <p class="subtitle">
+            Pick galaxies from the night sky. Measure distance from their
+            Cepheid stars and redshift from their light. Watch Hubble&rsquo;s
+            law emerge.
+          </p>
+        </div>
+      </header>
+      <nav id="action-bar" class="header-buttons" aria-label="Information">
+        <button id="how-btn" type="button" title="How the app works">
+          How it works
+        </button>
+        <button id="how-we-know-btn" type="button" title="The physics behind each calculated value">
+          How we know
+        </button>
+        <button id="diagram-guide-btn" type="button" disabled title="Plot at least 8 galaxies on your diagram to unlock this guide.">
+          Diagram guide
+        </button>
+        <button id="tour-btn" type="button" title="Replay the on-screen tour">
+          ? Tour
+        </button>
+      </nav>
+
+      <main>
+        <section id="sky-panel" aria-label="Night sky viewer">
+          <div id="sky-controls">
+            <div class="control-group">
+              <span class="control-group-heading">Find</span>
+              <input id="goto-input" type="text" placeholder="e.g. M31, NGC 5584" />
+              <button id="goto-btn">Go</button>
+            </div>
+            <div class="control-group">
+              <span class="control-group-heading">Sky picture</span>
+              <select id="survey-select">
+                <option value="P/DSS2/color">DSS2 (colour)</option>
+                <option value="P/PanSTARRS/DR1/color-z-zg-g">PanSTARRS</option>
+                <option value="P/SDSS9/color">SDSS</option>
+                <option value="P/2MASS/color">2MASS (infrared)</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <span class="control-group-heading">Search</span>
+              <button id="search-btn" class="primary" title="Search SDSS for galaxies in the visible part of the sky (doesn't add them yet)">
+                Search SDSS
+              </button>
+              <button id="add-all-btn" title="Add every search result to the chart">
+                Add all
+              </button>
+              <button id="clear-candidates-btn" title="Clear search-result markers">
+                Clear results
+              </button>
+              <label class="control-pair">
+                <span>limit</span>
+                <input id="region-limit" type="number" min="1" max="500" value="50" />
+              </label>
+            </div>
+            <div class="control-group">
+              <span class="control-group-heading">Markers</span>
+              <label class="control-pair">
+                <input type="checkbox" id="opt-show-markers" checked />
+                Galaxy markers
+              </label>
+              <label class="control-pair">
+                <input type="checkbox" id="opt-show-mapinfo" />
+                Projection &amp; coords
+              </label>
+            </div>
+            <span class="hint" id="sky-status">Loading sky&hellip;</span>
+          </div>
+          <div id="aladin-lite-div"></div>
+        </section>
+
+        <section id="diagram-panel" aria-label="Hubble diagram">
+          <div id="diagram"></div>
+          <details id="graph-options" open>
+            <summary>Graph options</summary>
+            <div id="diagram-controls"></div>
+          </details>
+        </section>
+
+        <aside id="info-panel" aria-label="Selected galaxy">
+          <h2>Selected galaxy</h2>
+          <div id="data-panel">
+            <p class="hint">Click a galaxy marker on the sky.</p>
+          </div>
+          <div id="galaxy-sets"></div>
+        </aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

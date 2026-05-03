@@ -1,0 +1,38 @@
+[
+  {
+    "id": "ngc4424-66790",
+    "galaxyId": "ngc4424",
+    "ra": 186.80215,
+    "dec": 9.4183,
+    "periodDays": 21.88,
+    "meanMag": 24.27,
+    "magBand": "F160W",
+    "magUncertainty": 0.53,
+    "vMinusI": 0.95,
+    "source": "SH0ES"
+  },
+  {
+    "id": "ngc4424-37604",
+    "galaxyId": "ngc4424",
+    "ra": 186.79527,
+    "dec": 9.42358,
+    "periodDays": 28.63,
+    "meanMag": 24.5,
+    "magBand": "F160W",
+    "magUncertainty": 0.42,
+    "vMinusI": 1.08,
+    "source": "SH0ES"
+  },
+  {
+    "id": "ngc4424-44183",
+    "galaxyId": "ngc4424",
+    "ra": 186.79643,
+    "dec": 9.42204,
+    "periodDays": 36.4,
+    "meanMag": 22.78,
+    "magBand": "F160W",
+    "magUncertainty": 0.73,
+    "vMinusI": 1.55,
+    "source": "SH0ES"
+  }
+]

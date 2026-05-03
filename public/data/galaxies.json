@@ -1,0 +1,724 @@
+[
+  {
+    "id": "lmc",
+    "name": "Large Magellanic Cloud",
+    "altNames": [
+      "LMC",
+      "ESO 56-115"
+    ],
+    "ra": 80.8939,
+    "dec": -69.7561,
+    "type": "irregular",
+    "distanceMpc": 0.0497,
+    "distanceMpcErr": 0.001,
+    "z": 0.000927,
+    "vRecKmS": 278,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": true,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A satellite galaxy of the Milky Way, visible to the naked eye from the southern hemisphere. Home to thousands of well-studied Cepheid variables.",
+    "wikipedia": "Large_Magellanic_Cloud",
+    "isAnomaly": true,
+    "anomalyExplanation": "Its motion is dominated by orbiting the Milky Way, not by the universe's expansion — so it doesn't sit on Hubble's law line."
+  },
+  {
+    "id": "smc",
+    "name": "Small Magellanic Cloud",
+    "altNames": [
+      "SMC",
+      "NGC 292"
+    ],
+    "ra": 13.1583,
+    "dec": -72.8003,
+    "type": "irregular",
+    "distanceMpc": 0.0617,
+    "distanceMpcErr": 0.0014,
+    "z": 0.000527,
+    "vRecKmS": 158,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": true,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "The other naked-eye Magellanic galaxy. Henrietta Leavitt discovered the period–luminosity relation by studying Cepheids in this very galaxy.",
+    "wikipedia": "Small_Magellanic_Cloud",
+    "isAnomaly": true,
+    "anomalyExplanation": "Like the LMC, the SMC is bound to the Milky Way — its velocity is gravitational, not cosmological."
+  },
+  {
+    "id": "m31",
+    "name": "Andromeda",
+    "altNames": [
+      "M31",
+      "NGC 224"
+    ],
+    "ra": 10.6847,
+    "dec": 41.2687,
+    "type": "spiral",
+    "distanceMpc": 0.778,
+    "distanceMpcErr": 0.044,
+    "z": -0.001,
+    "vRecKmS": -300,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": true,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "The nearest large spiral galaxy, and the most distant thing visible to the naked eye. It's heading toward the Milky Way for a collision in ~4 billion years.",
+    "wikipedia": "Andromeda_Galaxy",
+    "isAnomaly": true,
+    "anomalyExplanation": "Andromeda is blueshifted (moving toward us!) — its gravitational attraction with the Milky Way overwhelms cosmological expansion at this distance."
+  },
+  {
+    "id": "m33",
+    "name": "Triangulum",
+    "altNames": [
+      "M33",
+      "NGC 598"
+    ],
+    "ra": 23.4621,
+    "dec": 30.6602,
+    "type": "spiral",
+    "distanceMpc": 0.86,
+    "distanceMpcErr": 0.04,
+    "z": -0.0006,
+    "vRecKmS": -179,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": true,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "The third-largest galaxy in the Local Group. Slightly blueshifted because, like Andromeda, it's gravitationally bound to our neighbourhood.",
+    "wikipedia": "Triangulum_Galaxy",
+    "isAnomaly": true,
+    "anomalyExplanation": "Local Group member — its motion is set by gravity within the group, not by Hubble flow."
+  },
+  {
+    "id": "ic1613",
+    "name": "IC 1613",
+    "altNames": [
+      "DDO 8"
+    ],
+    "ra": 16.1992,
+    "dec": 2.1175,
+    "type": "dwarf",
+    "distanceMpc": 0.755,
+    "distanceMpcErr": 0.025,
+    "z": -0.000777,
+    "vRecKmS": -233,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A faint dwarf galaxy in the Local Group, used to calibrate the Cepheid distance scale because it's nearly free of dust.",
+    "wikipedia": "IC_1613"
+  },
+  {
+    "id": "ngc6822",
+    "name": "Barnard's Galaxy",
+    "altNames": [
+      "NGC 6822",
+      "IC 4895"
+    ],
+    "ra": 296.2358,
+    "dec": -14.8056,
+    "type": "irregular",
+    "distanceMpc": 0.5,
+    "distanceMpcErr": 0.025,
+    "z": -0.000193,
+    "vRecKmS": -57,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A Local Group dwarf irregular discovered by E. E. Barnard in 1884.",
+    "wikipedia": "Barnard%27s_Galaxy"
+  },
+  {
+    "id": "m81",
+    "name": "Bode's Galaxy",
+    "altNames": [
+      "M81",
+      "NGC 3031"
+    ],
+    "ra": 148.8882,
+    "dec": 69.0653,
+    "type": "spiral",
+    "distanceMpc": 3.63,
+    "distanceMpcErr": 0.34,
+    "z": -0.000113,
+    "vRecKmS": -34,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A grand-design spiral in Ursa Major, slightly blueshifted because the M81 group is falling toward the Local Group.",
+    "wikipedia": "Messier_81",
+    "isAnomaly": true,
+    "anomalyExplanation": "Even though M81 is millions of parsecs away, local gravitational pull still beats Hubble flow."
+  },
+  {
+    "id": "m82",
+    "name": "Cigar Galaxy",
+    "altNames": [
+      "M82",
+      "NGC 3034"
+    ],
+    "ra": 148.9685,
+    "dec": 69.6797,
+    "type": "irregular",
+    "distanceMpc": 3.53,
+    "distanceMpcErr": 0.26,
+    "z": 0.000677,
+    "vRecKmS": 203,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A starburst galaxy. Tidal interactions with M81 have triggered a torrent of star formation in its core.",
+    "wikipedia": "Messier_82"
+  },
+  {
+    "id": "centaurus_a",
+    "name": "Centaurus A",
+    "altNames": [
+      "NGC 5128"
+    ],
+    "ra": 201.3651,
+    "dec": -43.0191,
+    "type": "elliptical",
+    "distanceMpc": 3.8,
+    "distanceMpcErr": 0.1,
+    "z": 0.001825,
+    "vRecKmS": 547,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A peculiar elliptical with a dramatic dust lane — the result of a recent merger with a smaller spiral. Hosts a supermassive black hole.",
+    "wikipedia": "Centaurus_A"
+  },
+  {
+    "id": "m51",
+    "name": "Whirlpool Galaxy",
+    "altNames": [
+      "M51",
+      "NGC 5194"
+    ],
+    "ra": 202.4696,
+    "dec": 47.1952,
+    "type": "spiral",
+    "distanceMpc": 8.58,
+    "distanceMpcErr": 0.1,
+    "z": 0.001544,
+    "vRecKmS": 463,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 6790,
+      "mjd": 56430,
+      "fiber": 184
+    },
+    "claimToFame": "A face-on grand-design spiral interacting with its smaller companion NGC 5195. The first galaxy ever recognised as a spiral (Lord Rosse, 1845).",
+    "wikipedia": "Whirlpool_Galaxy"
+  },
+  {
+    "id": "m104",
+    "name": "Sombrero Galaxy",
+    "altNames": [
+      "M104",
+      "NGC 4594"
+    ],
+    "ra": 189.9976,
+    "dec": -11.6231,
+    "type": "spiral",
+    "distanceMpc": 9.55,
+    "distanceMpcErr": 0.13,
+    "z": 0.003416,
+    "vRecKmS": 1024,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "Edge-on spiral with a vast halo and a striking dust lane. Bright bulge dominated by old stars.",
+    "wikipedia": "Sombrero_Galaxy"
+  },
+  {
+    "id": "m87",
+    "name": "M87",
+    "altNames": [
+      "NGC 4486",
+      "Virgo A"
+    ],
+    "ra": 187.7059,
+    "dec": 12.3911,
+    "type": "elliptical",
+    "distanceMpc": 16.4,
+    "distanceMpcErr": 0.5,
+    "z": 0.004283,
+    "vRecKmS": 1284,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 1693,
+      "mjd": 53446,
+      "fiber": 280
+    },
+    "claimToFame": "A giant elliptical at the heart of the Virgo Cluster. Its supermassive black hole was the first to be directly imaged (Event Horizon Telescope, 2019).",
+    "wikipedia": "Messier_87"
+  },
+  {
+    "id": "ngc4258",
+    "name": "NGC 4258",
+    "altNames": [
+      "M106"
+    ],
+    "ra": 184.7396,
+    "dec": 47.3038,
+    "type": "spiral",
+    "distanceMpc": 7.58,
+    "distanceMpcErr": 0.11,
+    "z": 0.00149,
+    "vRecKmS": 447,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 6671,
+      "mjd": 56388,
+      "fiber": 110
+    },
+    "claimToFame": "A maser galaxy with a precisely measured geometric distance. The whole Cepheid distance ladder is anchored against this one number.",
+    "wikipedia": "Messier_106"
+  },
+  {
+    "id": "ngc1015",
+    "name": "NGC 1015",
+    "altNames": [
+      "UGC 2129"
+    ],
+    "ra": 39.55175,
+    "dec": -1.31889,
+    "type": "barred-spiral",
+    "distanceMpc": 32.2,
+    "distanceMpcErr": 1.4,
+    "z": 0.008767,
+    "vRecKmS": 2628,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 425,
+      "mjd": 51898,
+      "fiber": 449
+    },
+    "claimToFame": "A barred spiral and SH0ES Cepheid host. Its supernova SN 2009ig anchors a rung of the distance ladder.",
+    "wikipedia": "NGC_1015"
+  },
+  {
+    "id": "ngc1309",
+    "name": "NGC 1309",
+    "altNames": [
+      "UGCA 048"
+    ],
+    "ra": 50.5273,
+    "dec": -15.3999,
+    "type": "spiral",
+    "distanceMpc": 33.5,
+    "distanceMpcErr": 1.1,
+    "z": 0.007125,
+    "vRecKmS": 2136,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A face-on spiral that hosted the well-observed Type Ia supernova SN 2002fk.",
+    "wikipedia": "NGC_1309"
+  },
+  {
+    "id": "ngc1365",
+    "name": "NGC 1365",
+    "altNames": [
+      "Great Barred Spiral"
+    ],
+    "ra": 53.4015,
+    "dec": -36.1404,
+    "type": "barred-spiral",
+    "distanceMpc": 17.95,
+    "distanceMpcErr": 0.6,
+    "z": 0.005457,
+    "vRecKmS": 1636,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A textbook barred spiral with a strong active nucleus. SN 2012fr was a SH0ES calibrator here.",
+    "wikipedia": "NGC_1365"
+  },
+  {
+    "id": "ngc3370",
+    "name": "NGC 3370",
+    "altNames": [
+      "UGC 5887"
+    ],
+    "ra": 161.7679,
+    "dec": 17.2741,
+    "type": "spiral",
+    "distanceMpc": 26.5,
+    "distanceMpcErr": 1,
+    "z": 0.004266,
+    "vRecKmS": 1279,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 1742,
+      "mjd": 53053,
+      "fiber": 491
+    },
+    "claimToFame": "A SH0ES Cepheid host with a supernova (SN 1994ae) used to calibrate Type Ia luminosities.",
+    "wikipedia": "NGC_3370"
+  },
+  {
+    "id": "ngc3627",
+    "name": "NGC 3627",
+    "altNames": [
+      "M66"
+    ],
+    "ra": 170.0625,
+    "dec": 12.9914,
+    "type": "barred-spiral",
+    "distanceMpc": 11.3,
+    "distanceMpcErr": 0.6,
+    "z": 0.002425,
+    "vRecKmS": 727,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 1620,
+      "mjd": 53140,
+      "fiber": 158
+    },
+    "claimToFame": "A member of the Leo Triplet. SH0ES used Cepheids here together with SN 1989B.",
+    "wikipedia": "Messier_66"
+  },
+  {
+    "id": "ngc4038",
+    "name": "Antennae Galaxies",
+    "altNames": [
+      "NGC 4038",
+      "Arp 244"
+    ],
+    "ra": 180.4719,
+    "dec": -18.8678,
+    "type": "merger",
+    "distanceMpc": 22,
+    "distanceMpcErr": 1.4,
+    "z": 0.005477,
+    "vRecKmS": 1642,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A pair of colliding spirals throwing out long tidal tails. SN 2007sr provided a SH0ES rung here.",
+    "wikipedia": "Antennae_Galaxies"
+  },
+  {
+    "id": "ngc4424",
+    "name": "NGC 4424",
+    "altNames": [
+      "UGC 7561"
+    ],
+    "ra": 186.7983,
+    "dec": 9.4203,
+    "type": "spiral",
+    "distanceMpc": 16.4,
+    "distanceMpcErr": 1.3,
+    "z": 0.001463,
+    "vRecKmS": 439,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 1615,
+      "mjd": 53166,
+      "fiber": 538
+    },
+    "claimToFame": "A peculiar spiral disturbed by interactions in the Virgo Cluster. SH0ES Cepheid host (SN 2012cg).",
+    "wikipedia": "NGC_4424"
+  },
+  {
+    "id": "ngc4536",
+    "name": "NGC 4536",
+    "altNames": [
+      "UGC 7732"
+    ],
+    "ra": 188.6128,
+    "dec": 2.1881,
+    "type": "barred-spiral",
+    "distanceMpc": 14.9,
+    "distanceMpcErr": 0.4,
+    "z": 0.006031,
+    "vRecKmS": 1808,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 287,
+      "mjd": 52023,
+      "fiber": 510
+    },
+    "claimToFame": "A starburst barred spiral on the outskirts of the Virgo Cluster (SH0ES host of SN 1981B).",
+    "wikipedia": "NGC_4536"
+  },
+  {
+    "id": "ngc4639",
+    "name": "NGC 4639",
+    "altNames": [
+      "UGC 7884"
+    ],
+    "ra": 190.7185,
+    "dec": 13.2573,
+    "type": "spiral",
+    "distanceMpc": 21.98,
+    "distanceMpcErr": 0.7,
+    "z": 0.003395,
+    "vRecKmS": 1018,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 1616,
+      "mjd": 53169,
+      "fiber": 506
+    },
+    "claimToFame": "A Virgo Cluster spiral that hosted SN 1990N. One of the longest-baseline SH0ES Cepheid hosts.",
+    "wikipedia": "NGC_4639"
+  },
+  {
+    "id": "ngc5584",
+    "name": "NGC 5584",
+    "altNames": [
+      "MCG -01-37-005"
+    ],
+    "ra": 215.5993,
+    "dec": -0.387,
+    "type": "spiral",
+    "distanceMpc": 22.5,
+    "distanceMpcErr": 0.5,
+    "z": 0.005464,
+    "vRecKmS": 1638,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 327,
+      "mjd": 52294,
+      "fiber": 472
+    },
+    "claimToFame": "Riess+ 2011's flagship SH0ES galaxy — over 250 Cepheids identified by HST. SN 2007af.",
+    "wikipedia": "NGC_5584"
+  },
+  {
+    "id": "ngc7250",
+    "name": "NGC 7250",
+    "altNames": [
+      "UGC 11980"
+    ],
+    "ra": 333.7396,
+    "dec": 40.5604,
+    "type": "irregular",
+    "distanceMpc": 20,
+    "distanceMpcErr": 1,
+    "z": 0.003851,
+    "vRecKmS": 1155,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A peculiar barred spiral hosting SN 2013dy, used in the SH0ES distance ladder.",
+    "wikipedia": "NGC_7250"
+  },
+  {
+    "id": "ugc9391",
+    "name": "UGC 9391",
+    "altNames": [
+      "PGC 51344"
+    ],
+    "ra": 218.6537,
+    "dec": 59.3284,
+    "type": "spiral",
+    "distanceMpc": 50.7,
+    "distanceMpcErr": 1.7,
+    "z": 0.006383,
+    "vRecKmS": 1914,
+    "capabilities": {
+      "cepheidPL": true,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 6985,
+      "mjd": 56439,
+      "fiber": 700
+    },
+    "claimToFame": "One of the furthest galaxies where SH0ES could resolve Cepheids — the upper limit of the Cepheid rung of the ladder.",
+    "wikipedia": "UGC_9391"
+  },
+  {
+    "id": "hdfn_4_555",
+    "name": "HDF-N 4-555.1",
+    "altNames": [
+      "HDF-N J123649+621313"
+    ],
+    "ra": 189.20417,
+    "dec": 62.21972,
+    "type": "deep-field",
+    "distanceMpc": 1750,
+    "distanceMpcErr": 200,
+    "z": 0.475,
+    "vRecKmS": 142401,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A spectroscopically-confirmed source from the original 1995 Hubble Deep Field North. At z ≈ 0.5 it's already showing relativistic effects.",
+    "isAnomaly": true,
+    "anomalyExplanation": "At this redshift the simple v = c·z formula starts to overestimate velocity — special relativity corrections matter."
+  },
+  {
+    "id": "hudf_z3",
+    "name": "HUDF z=3 galaxy",
+    "altNames": [
+      "HUDF-9-1"
+    ],
+    "ra": 53.1564,
+    "dec": -27.7733,
+    "type": "deep-field",
+    "distanceMpc": 6500,
+    "distanceMpcErr": 500,
+    "z": 3,
+    "vRecKmS": 899377,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "A high-redshift Lyman-break galaxy in the Hubble Ultra Deep Field. Its light has been travelling for over 11 billion years.",
+    "isAnomaly": true,
+    "anomalyExplanation": "Far beyond the regime where Hubble's law is linear — distance and velocity here come from a full cosmological model, not v = H₀·d."
+  },
+  {
+    "id": "ngc7320",
+    "name": "NGC 7320",
+    "altNames": [
+      "Stephan's Quintet member"
+    ],
+    "ra": 339.0146,
+    "dec": 33.9489,
+    "type": "spiral",
+    "distanceMpc": 12.5,
+    "distanceMpcErr": 0.6,
+    "z": 0.0026,
+    "vRecKmS": 779,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": false
+    },
+    "claimToFame": "Appears to belong to Stephan's Quintet but its redshift is far smaller — it's a foreground galaxy projected onto the group by chance.",
+    "wikipedia": "NGC_7320",
+    "isAnomaly": true,
+    "anomalyExplanation": "Sky position can deceive! Other Quintet members sit at z ≈ 0.022 (nearly 10× further). NGC 7320 is just visually superimposed."
+  },
+  {
+    "id": "3c273",
+    "name": "3C 273",
+    "altNames": [
+      "PG 1226+023"
+    ],
+    "ra": 187.2779,
+    "dec": 2.0524,
+    "type": "quasar",
+    "distanceMpc": 749,
+    "distanceMpcErr": 50,
+    "z": 0.158339,
+    "vRecKmS": 47469,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 290,
+      "mjd": 51941,
+      "fiber": 218
+    },
+    "claimToFame": "The first quasar ever identified (1963). Bright as a 13th-magnitude star, but hundreds of megaparsecs away — the closest we have to a portable demonstration of cosmological redshift.",
+    "wikipedia": "3C_273",
+    "isAnomaly": true,
+    "anomalyExplanation": "Bright doesn't mean nearby — quasars are powered by supermassive black holes and can outshine entire galaxies from billions of light-years away."
+  },
+  {
+    "id": "ngc1365_agn",
+    "name": "NGC 1068",
+    "altNames": [
+      "M77"
+    ],
+    "ra": 40.6696,
+    "dec": -0.0133,
+    "type": "agn",
+    "distanceMpc": 14.4,
+    "distanceMpcErr": 0.7,
+    "z": 0.003793,
+    "vRecKmS": 1137,
+    "capabilities": {
+      "cepheidPL": false,
+      "lightCurves": false,
+      "sdssSpectrum": true
+    },
+    "sdssSpec": {
+      "plate": 421,
+      "mjd": 51821,
+      "fiber": 519
+    },
+    "claimToFame": "The closest Seyfert 2 active galactic nucleus. Strong emission lines make it an ideal practice target for redshift identification.",
+    "wikipedia": "Messier_77"
+  }
+]

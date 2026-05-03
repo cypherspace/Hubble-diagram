@@ -1,0 +1,7 @@
+node_modules
+dist
+dist-embed
+.firebase
+firebase-debug.log
+*.log
+.DS_Store
