@@ -133,8 +133,29 @@ class App {
     gotoInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") fire();
     });
+    // Restore the user's last-chosen sky picture, if any.
+    try {
+      const saved = localStorage.getItem("hubble-diagram.survey");
+      if (saved) {
+        const opt = surveySelect.querySelector(
+          `option[value="${CSS.escape(saved)}"]`,
+        );
+        if (opt) {
+          surveySelect.value = saved;
+          void this.skyViewer.setSurvey(saved);
+        }
+      }
+    } catch {
+      /* localStorage may be unavailable in some embedding contexts */
+    }
     surveySelect.addEventListener("change", () => {
-      void this.skyViewer.setSurvey(surveySelect.value);
+      const v = surveySelect.value;
+      void this.skyViewer.setSurvey(v);
+      try {
+        localStorage.setItem("hubble-diagram.survey", v);
+      } catch {
+        /* ignore */
+      }
     });
     searchBtn.addEventListener("click", () => {
       const limit = clamp(parseInt(regionLimit.value, 10) || 50, 1, 500);

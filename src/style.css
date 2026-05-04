@@ -108,8 +108,22 @@ main {
   padding: 12px;
   min-height: 0;
 }
+/* Tablet / narrow desktop — collapse to a single column but keep
+   each panel readable. Aladin and the chart get explicit min-heights
+   so they don't squash to nothing. */
 @media (max-width: 1100px) {
   main { grid-template-columns: 1fr; }
+  #sky-panel, #diagram-panel, #info-panel { min-height: 420px; }
+  #aladin-lite-div { min-height: 420px; }
+  .hubble-chart-host { min-height: 380px; }
+}
+/* Phone — stack everything vertically, shrink padding. */
+@media (max-width: 640px) {
+  main { padding: 6px; gap: 6px; }
+  #sky-panel, #diagram-panel, #info-panel { padding: 6px; }
+  header h1 { font-size: 16px; }
+  header .subtitle { font-size: 12px; }
+  #action-bar { padding: 6px 10px; gap: 4px; }
 }
 
 #sky-panel, #diagram-panel, #info-panel {
