@@ -286,7 +286,7 @@ export class Hubble1929Tour {
       <p>These "nebulae" are other galaxies. But before the 1920s, we
         didn't know that; they just looked like patches of light in
         the sky with many stars in them. It was Hubble himself, in
-        1924, who proved that nebulae — like the "Andromeda
+        1924, who proved that these nebulae — like the "Andromeda
         Nebula" — were not parts of the Milky Way at all, but much
         further away.</p>
       <p>The original term for these was 'extra-galactic' nebulae. It

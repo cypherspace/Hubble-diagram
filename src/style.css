@@ -188,10 +188,14 @@ section, aside {
   min-width: 0;
   overflow: hidden;
 }
-aside {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
+/* Right info-panel: split into two independent scroll areas. The
+   selected-galaxy data block always shows in full (no scrolling
+   needed to reach the Find distance / Find redshift buttons), and
+   the galaxy-sets list below gets the remaining vertical space and
+   scrolls if it grows beyond it. Previously the whole aside was a
+   single scroll region, which meant the action buttons could be
+   pushed below the fold. */
+aside { overflow: hidden; }
 
 /* Sky-panel controls — single flowing flex row that wraps as needed.
    Mirrors h-r-diagram exactly so the two apps feel identical. */
@@ -237,6 +241,20 @@ aside {
   margin-left: auto;
   color: var(--muted);
 }
+
+/* Inline (?) help affordance — small text-only button that opens a
+   tooltip / modal explainer. Distinct from the bordered action
+   buttons so it reads as text, not a control. */
+#sky-controls .help-btn {
+  background: transparent;
+  border: none;
+  color: var(--accent-2);
+  text-decoration: underline;
+  padding: 0.15rem 0.3rem;
+  font-size: 0.78rem;
+  cursor: help;
+}
+#sky-controls .help-btn:hover { color: var(--accent); background: transparent; }
 .control-group {
   display: flex;
   flex-wrap: wrap;
@@ -387,6 +405,13 @@ h2 {
   border-radius: 6px;
   margin-bottom: 0.6rem;
   min-height: 80px;
+  /* Independent vertical scroll for the selected-galaxy block, with
+     a hard cap so the galaxy-sets list below it never disappears
+     entirely — even when a galaxy has long anomaly text. */
+  flex: 0 1 auto;
+  max-height: 55%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .hint { color: var(--muted); font-size: 0.85rem; margin: 0; }
 
@@ -409,10 +434,16 @@ h2 {
 
 /* --- Galaxy sets (right info panel) — same look as h-r-diagram --- */
 #galaxy-sets {
-  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  /* Take whatever vertical space is left after the data-panel and
+     scroll independently. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.25rem;
 }
 .star-set {
   background: var(--panel-2);
@@ -503,6 +534,46 @@ h2 {
   font-size: 0.72rem;
   text-align: right;
 }
+
+/* --- Collapsible info sections inside the modal panels (How it
+   works / How we know / Diagram guide). Mirrors h-r-diagram's
+   modal section style — each h4-style heading becomes a clickable
+   `<details>` row with a ▸/▾ toggle, content collapsed below. */
+.info-section {
+  background: var(--panel-2);
+  border-radius: 6px;
+  margin: 0.4rem 0;
+  padding: 0;
+  border: 1px solid var(--grid);
+  overflow: hidden;
+}
+.info-section > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.8rem;
+  color: var(--accent-2);
+  font-weight: 600;
+  font-size: 0.95rem;
+  user-select: none;
+}
+.info-section > summary::-webkit-details-marker { display: none; }
+.info-section > summary::before {
+  content: "▸";
+  color: var(--muted);
+  font-size: 0.75rem;
+  transition: transform 0.15s ease;
+}
+.info-section[open] > summary::before { transform: rotate(90deg); }
+.info-section > summary:hover { background: rgba(108, 196, 255, 0.08); }
+.info-section-body {
+  padding: 0.5rem 0.9rem 0.7rem;
+  border-top: 1px solid var(--grid);
+}
+.info-section-body p:first-child { margin-top: 0.3rem; }
+.info-section-body p:last-child { margin-bottom: 0.3rem; }
 
 /* --- Diagram frames inside How we know --- */
 .hwk-diagram {
@@ -683,3 +754,65 @@ h2 {
 .secondary-row strong { color: var(--fg); }
 
 a, a:visited { color: var(--link); }
+
+/* --- Aladin fullscreen --------------------------------------------
+   When the user clicks Aladin's fullscreen toggle (or hits F11 from
+   within the sky panel), the SkyViewer adds `aladin-fullscreen` to
+   the body. Hide every other pane and pin the sky panel to the full
+   viewport so the Hubble diagram and the right-hand info panel
+   don't overlay on top of the sky map. The Search / Find / Jump-to
+   controls stay because they live inside #sky-panel.
+
+   Some environments (iframes without `allow="fullscreen"`) fall back
+   to a CSS-only fullscreen, which is why we force position+z-index
+   on the sky panel rather than relying purely on `display: none` on
+   its siblings. Same approach as h-r-diagram. */
+body.aladin-fullscreen header,
+body.aladin-fullscreen #action-bar,
+body.aladin-fullscreen #diagram-panel,
+body.aladin-fullscreen #info-panel { display: none !important; }
+body.aladin-fullscreen #app {
+  padding: 0 !important;
+  gap: 0 !important;
+}
+body.aladin-fullscreen main {
+  display: block !important;
+  height: 100vh !important;
+}
+body.aladin-fullscreen #sky-panel {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  border-radius: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+/* --- Scrollbars ---------------------------------------------------
+   Default OS scrollbars (white / grey) clash with the dark blue
+   palette. Style them to blend with --panel and pop on hover in
+   --accent-2. Applies globally inside the app.
+
+   Firefox uses `scrollbar-color: thumb track` and `scrollbar-width`;
+   Chromium / Safari / Edge use the legacy ::-webkit-scrollbar rules.
+   Both are kept in sync below. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+  border: 1px solid var(--panel);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-2);
+}
+*::-webkit-scrollbar-corner { background: transparent; }

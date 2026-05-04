@@ -80,7 +80,7 @@ export class DataPanel {
         `${galaxy.distanceMpc.toFixed(2)} Mpc ± ${galaxy.distanceMpcErr.toFixed(2)}`,
       ),
     );
-    wrap.appendChild(headlineStat("Redshift z", galaxy.z.toExponential(3)));
+    wrap.appendChild(headlineStat("Redshift z", formatRedshift(galaxy.z)));
     wrap.appendChild(
       headlineStat("Recession velocity", `${galaxy.vRecKmS} km/s`),
     );
@@ -184,6 +184,15 @@ function badge(
   s.title = title;
   s.textContent = text + (on ? "" : " (n/a)");
   return s;
+}
+
+// Format redshift as a plain decimal — students read "0.001278" much
+// more easily than "1.278e-3". 6 decimal places covers everything
+// from blueshifted Local Group galaxies (~−0.001) up to z ≈ 0.999;
+// for high-z deep-field galaxies (z ≥ 1) we drop to 4 decimals.
+function formatRedshift(z: number): string {
+  if (Math.abs(z) >= 1) return z.toFixed(4);
+  return z.toFixed(6);
 }
 
 // Highlighted headline statistic — same visual treatment as
