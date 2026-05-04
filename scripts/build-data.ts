@@ -61,15 +61,52 @@ async function main(): Promise<void> {
     }
   }
 
-  // 3. Spectra
+  // 3. Spectra. We accept the response only if it parses to a
+  // reasonable number of (wavelength, flux) rows. Empty bodies and
+  // HTML error pages get a sentinel `.empty` file so the runtime can
+  // surface a clean "spectrum unavailable" state.
   for (const g of CURATED_GALAXIES) {
     if (!g.capabilities.sdssSpectrum || !g.sdssSpec) continue;
     const out = resolve(DATA_ROOT, "spectra", `${g.id}.csv`);
-    if (!FORCE && (await exists(out))) continue;
+    const sentinel = resolve(DATA_ROOT, "spectra", `${g.id}.empty`);
+    if (!FORCE) {
+      // Skip galaxies we already have a non-empty CSV for — but force
+      // a re-fetch on previously-empty (0-byte) files.
+      if (await exists(out)) {
+        const stat = await import("node:fs/promises").then((m) =>
+          m.stat(out),
+        );
+        if (stat.size > 100) continue;
+      } else if (await exists(sentinel)) {
+        continue;
+      }
+    }
     try {
       const csv = await fetchSdssSpectrum(g.sdssSpec);
+      const dataRows = csv
+        .split(/\r?\n/)
+        .filter((l) => /^\s*\d/.test(l)).length;
+      if (
+        csv.length < 200 ||
+        /<html|<body/i.test(csv) ||
+        dataRows < 50
+      ) {
+        // Empty / HTML / too-few-rows: write the sentinel and warn.
+        await writeFile(sentinel, "");
+        // Remove a previous bad CSV if present.
+        try {
+          const fs = await import("node:fs/promises");
+          await fs.unlink(out);
+        } catch {
+          /* ok */
+        }
+        console.warn(
+          `No usable spectrum at plate=${g.sdssSpec.plate} mjd=${g.sdssSpec.mjd} fiber=${g.sdssSpec.fiber} for ${g.id} (${dataRows} rows). Wrote ${sentinel}.`,
+        );
+        continue;
+      }
       await writeFile(out, csv);
-      console.log(`Wrote ${out}`);
+      console.log(`Wrote ${out} (${dataRows} rows)`);
     } catch (e) {
       console.warn(`Skipped spectrum for ${g.id}: ${(e as Error).message}`);
     }

@@ -338,7 +338,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     z: 0.002425,
     vRecKmS: v(0.002425),
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
-    sdssSpec: { plate: 1620, mjd: 53140, fiber: 158 },
+    sdssSpec: { plate: 1605, mjd: 53062, fiber: 451 },
     claimToFame:
       "A member of the Leo Triplet. SH0ES used Cepheids here together with SN 1989B.",
     wikipedia: "Messier_66",
@@ -455,7 +455,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     z: 0.006383,
     vRecKmS: v(0.006383),
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
-    sdssSpec: { plate: 6985, mjd: 56439, fiber: 700 },
+    sdssSpec: { plate: 790, mjd: 52441, fiber: 403 },
     claimToFame:
       "One of the furthest galaxies where SH0ES could resolve Cepheids — the upper limit of the Cepheid rung of the ladder.",
     wikipedia: "UGC_9391",
