@@ -1,4 +1,5 @@
 import type { SpectrumPoint } from "../types";
+import { loadLiveSdssSpectrum } from "./sdssSpec";
 
 // Loads a pre-fetched SDSS DR17 spec-lite CSV from Firebase Hosting.
 // The build-data script writes these as 2-column CSV (wavelength,flux)
@@ -7,6 +8,10 @@ import type { SpectrumPoint } from "../types";
 // HTML error / empty body — the build-data script writes a sentinel
 // `{galaxyId}.empty` file instead, and we surface a clear "no
 // spectrum" error here.
+//
+// Search-result galaxies (id starts with `sdss-<objID>`) skip the
+// static-file path entirely and resolve their spec-lite CSV at
+// runtime via SkyServer + dr17.sdss.org — see `./sdssSpec.ts`.
 
 const CACHE = new Map<string, SpectrumPoint[]>();
 
@@ -26,7 +31,21 @@ export async function loadSpectrum(
 ): Promise<SpectrumPoint[]> {
   if (CACHE.has(galaxyId)) return CACHE.get(galaxyId)!;
 
-  // Sentinel file from the build-data script — fast-path "no data".
+  // Search-result galaxies — resolve via SkyServer at runtime.
+  if (galaxyId.startsWith("sdss-")) {
+    const objId = galaxyId.slice("sdss-".length);
+    try {
+      const points = await loadLiveSdssSpectrum(objId, signal);
+      if (!points) throw new SpectrumUnavailableError(galaxyId);
+      CACHE.set(galaxyId, points);
+      return points;
+    } catch (e) {
+      if (e instanceof SpectrumUnavailableError) throw e;
+      throw new SpectrumUnavailableError(galaxyId);
+    }
+  }
+
+  // Curated galaxies — pre-built CSV from build-data, or sentinel.
   const sentinel = await fetch(`./data/spectra/${galaxyId}.empty`, {
     signal,
     method: "HEAD",
@@ -40,7 +59,6 @@ export async function loadSpectrum(
   const text = await r.text();
   const points = parseSpectrumCsv(text);
   if (points.length < 50) {
-    // CSV existed but is empty / corrupt. Treat as unavailable.
     throw new SpectrumUnavailableError(galaxyId);
   }
   CACHE.set(galaxyId, points);
