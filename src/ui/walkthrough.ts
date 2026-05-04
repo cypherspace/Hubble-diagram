@@ -19,42 +19,50 @@ const STEPS: Step[] = [
     selector: "#aladin-lite-div",
     title: "The night sky",
     body:
-      "This panel shows real telescope imagery. Galaxies in the curated " +
-      "set are marked with coloured shapes. Drag to pan, scroll to zoom. " +
-      "Click any marker to learn about that galaxy.",
+      "This panel shows real telescope imagery, from various different " +
+      "telescopes. We've marked some notable galaxies on here to begin " +
+      "with — but you can also search for galaxies in an area. You can " +
+      "scroll around, zoom in and out, and look wherever you like. " +
+      "Press \"Search SDSS\" to see if the Sloan Digital Sky Survey has " +
+      "detected any galaxies in the area you're looking at.",
   },
   {
     selector: "#galaxy-sets",
     title: "The galaxy list",
     body:
-      "All curated galaxies are listed here, grouped by category. Click " +
-      "a category to expand it, then click 'Add all to chart' to plot the " +
-      "whole group at once.",
+      "We've chosen some galaxies to get you started — for example, " +
+      "the Local Group, our closest galaxies. You can click on any " +
+      "galaxy to add it to the chart, see more information about it, " +
+      "and see it in the Sky Map.",
   },
   {
     selector: "#data-panel",
     title: "Galaxy details",
     body:
       "When you click a galaxy, its information appears here: type, " +
-      "distance, redshift, recession velocity. The badges at the top " +
-      "show what you can do with it (✦ Cepheids, λ Spectrum, ⚠ Anomaly).",
+      "distance, redshift, recession velocity. The distance, redshift " +
+      "and velocity have been calculated by astronomers; but if you " +
+      "see a Cepheids or Spectrum badge, you can try calculating those " +
+      "values yourself (not for the faint-hearted!)",
   },
   {
     selector: "#diagram",
     title: "Your Hubble diagram",
     body:
-      "Galaxies you add appear here as dots. The blue line is your " +
-      "measured H₀; the dashed grey line is the published value. With " +
-      "8+ galaxies plotted, the 'Diagram guide' button unlocks a deeper " +
-      "explanation of the regions.",
+      "Galaxies you add appear here as dots. Hubble looked at the " +
+      "relationship between a galaxy's distance and its speed — and " +
+      "as you add more galaxies to the chart, you'll also see that " +
+      "relationship happen. Once you've added enough galaxies, you " +
+      "can click the \"Diagram Guide\" to get a better explanation of " +
+      "what you're seeing.",
   },
   {
     selector: "#how-btn",
     title: "Help is always here",
     body:
-      "Read 'How it works' for the app workflow, or 'How we know' for the " +
-      "physics behind every number. You can replay this tour any time " +
-      "with the '? Tour' button.",
+      "Read 'How it works' for the process that you should follow, " +
+      "or 'How we know' for the physics behind every number. You can " +
+      "replay this tour any time with the '? Tour' button.",
   },
 ];
 

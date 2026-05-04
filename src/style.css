@@ -302,6 +302,16 @@ ul.galaxy-list li {
 ul.galaxy-list li:hover { background: var(--bg); }
 ul.galaxy-list li.added { background: var(--bg); color: var(--accent); }
 
+/* --- Diagram frames inside How we know --- */
+.hwk-diagram {
+  background: var(--bg);
+  border: 1px solid var(--grid);
+  border-radius: 4px;
+  padding: 6px;
+  margin: 8px 0;
+}
+.hwk-diagram svg { display: block; margin: 0 auto; }
+
 /* --- Cepheid panel (LaTeX + collapsible) --- */
 .cepheid-panel { display: flex; flex-direction: column; gap: 8px; }
 .cepheid-top-actions {
