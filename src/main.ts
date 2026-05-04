@@ -2,10 +2,9 @@ import "./style.css";
 import { CURATED_GALAXIES, GALAXY_SETS, findGalaxyById } from "./data/galaxies";
 import { C_KM_S } from "./data/derive";
 import {
-  searchSdssGalaxies,
-  sdssRowToGalaxy,
-  type SdssGalaxyRow,
-} from "./data/sdssGalaxies";
+  searchGalaxies,
+  searchedGalaxyToGalaxy,
+} from "./data/galaxySearch";
 import { VizierError } from "./data/vizier";
 import { HubbleDiagram } from "./ui/hubbleDiagram";
 import { Controls } from "./ui/controls";
@@ -38,10 +37,10 @@ class App {
   private skyViewer: SkyViewer;
   private galaxySetsContainer: HTMLElement;
   private skyStatusEl: HTMLElement;
-  // Galaxies returned by the most recent SDSS search. Live in-memory
-  // only — they're shown as candidate markers on the sky and merged
-  // into `findGalaxyById` lookups via `searchResults`.
-  private searchResults = new Map<string, ReturnType<typeof sdssRowToGalaxy>>();
+  // Galaxies returned by the most recent SDSS / 2MRS search. Live in-
+  // memory only — they're shown as candidate markers on the sky and
+  // merged into `findGalaxyById` lookups via `searchResults`.
+  private searchResults = new Map<string, Galaxy>();
   private inflightSearch: AbortController | null = null;
 
   constructor() {
@@ -380,23 +379,29 @@ class App {
     this.inflightSearch?.abort();
     const ctrl = new AbortController();
     this.inflightSearch = ctrl;
-    this.skyStatusEl.textContent = `Searching SDSS (radius ${radius.toFixed(2)}°, top ${limit})…`;
+    this.skyStatusEl.textContent = `Searching for galaxies (radius ${radius.toFixed(2)}°, top ${limit})…`;
     try {
-      const rows = await searchSdssGalaxies(ra, dec, radius, {
+      const result = await searchGalaxies(ra, dec, radius, {
         topN: limit,
         signal: ctrl.signal,
       });
       if (ctrl.signal.aborted) return;
-      const candidates = rows
-        .map((r: SdssGalaxyRow) => sdssRowToGalaxy(r))
+      const candidates = result.galaxies
+        .map((row) => searchedGalaxyToGalaxy(row))
         .filter((g) => !this.plotted.has(g.id));
       this.searchResults.clear();
       for (const g of candidates) this.searchResults.set(g.id, g);
       await this.skyViewer.setCandidates(candidates);
+      const sourceLabel =
+        result.sourceUsed === "sdss"
+          ? "from the Sloan Digital Sky Survey"
+          : result.sourceUsed === "2mrs"
+            ? "from the 2MASS Redshift Survey"
+            : "";
       this.skyStatusEl.textContent =
         candidates.length > 0
-          ? `Found ${candidates.length} SDSS galaxies. Click a marker to add one, or "Add all".`
-          : "No SDSS galaxies in that region. Try the SDSS sky survey or pan to a different patch.";
+          ? `Found ${candidates.length} galaxies ${sourceLabel}. Click a marker to add one, or "Add all".`
+          : "No galaxies found in that region. Try panning to a different patch — coverage is best in the northern hemisphere away from the Milky Way.";
     } catch (e) {
       if (ctrl.signal.aborted) return;
       const msg =
