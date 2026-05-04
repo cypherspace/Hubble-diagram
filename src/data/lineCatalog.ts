@@ -1,11 +1,24 @@
 // Common atomic/molecular lines that students will see in galaxy
-// spectra. Wavelengths are in Ångströms, in the rest frame (lab
-// values). Sources: NIST atomic spectra database, with the standard
-// "approximately the value most spectra texts use" rounding.
+// spectra. Wavelengths are stored in Ångströms (the units the source
+// catalogues use) but the SpectrumPanel and "How we know" diagrams
+// display them in nanometres (Å / 10) since that's the unit students
+// see in physics class. Source: NIST atomic spectra database with
+// the standard "approximately the value most spectra texts use"
+// rounding.
 //
 // Each entry carries a short student-facing description so the
 // SpectrumPanel dropdown can explain *why* this line shows up in a
 // galaxy's light.
+
+/** Convert Ångströms to nanometres for display. */
+export function angstromsToNm(a: number): number {
+  return a / 10;
+}
+
+/** Format a wavelength as "656.3 nm". */
+export function formatNm(angstroms: number): string {
+  return `${(angstroms / 10).toFixed(1)} nm`;
+}
 
 export interface SpectralLine {
   id: string;
