@@ -274,7 +274,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
     sdssSpec: { plate: 425, mjd: 51898, fiber: 449 },
     claimToFame:
-      "A barred spiral and SH0ES Cepheid host. Its supernova SN 2009ig anchors a rung of the distance ladder.",
+      "A barred spiral with measured Cepheids. A bright supernova exploded here in 2009, helping astronomers calibrate the distance scale.",
     wikipedia: "NGC_1015",
   },
   {
@@ -290,7 +290,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     vRecKmS: v(0.007125),
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: false },
     claimToFame:
-      "A face-on spiral that hosted the well-observed Type Ia supernova SN 2002fk.",
+      "A face-on spiral that hosted a well-observed Type Ia supernova (a kind of exploding white dwarf star) in 2002.",
     wikipedia: "NGC_1309",
   },
   {
@@ -306,7 +306,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     vRecKmS: v(0.005457),
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: false },
     claimToFame:
-      "A textbook barred spiral with a strong active nucleus. SN 2012fr was a SH0ES calibrator here.",
+      "A textbook barred spiral with a brightly-feeding black hole at its centre. A 2012 supernova here helped calibrate the distance scale.",
     wikipedia: "NGC_1365",
   },
   {
@@ -323,7 +323,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
     sdssSpec: { plate: 1742, mjd: 53053, fiber: 491 },
     claimToFame:
-      "A SH0ES Cepheid host with a supernova (SN 1994ae) used to calibrate Type Ia luminosities.",
+      "A spiral galaxy where the Hubble Space Telescope measured Cepheids. A 1994 supernova here helps tie the distance scale together.",
     wikipedia: "NGC_3370",
   },
   {
@@ -340,7 +340,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
     sdssSpec: { plate: 1605, mjd: 53062, fiber: 451 },
     claimToFame:
-      "A member of the Leo Triplet. SH0ES used Cepheids here together with SN 1989B.",
+      "A member of the Leo Triplet, a famous group of three nearby galaxies. Astronomers used both its Cepheids and a 1989 supernova to measure its distance.",
     wikipedia: "Messier_66",
   },
   {
@@ -356,7 +356,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     vRecKmS: v(0.005477),
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: false },
     claimToFame:
-      "A pair of colliding spirals throwing out long tidal tails. SN 2007sr provided a SH0ES rung here.",
+      "A pair of colliding spirals throwing out long tidal tails. A 2007 supernova here gave astronomers another rung on the distance ladder.",
     wikipedia: "Antennae_Galaxies",
   },
   {
@@ -373,7 +373,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
     sdssSpec: { plate: 1615, mjd: 53166, fiber: 538 },
     claimToFame:
-      "A peculiar spiral disturbed by interactions in the Virgo Cluster. SH0ES Cepheid host (SN 2012cg).",
+      "A peculiar spiral whose shape has been disturbed by gravity from neighbouring galaxies in the Virgo Cluster. A 2012 supernova here was used in distance calibration.",
     wikipedia: "NGC_4424",
   },
   {
@@ -390,7 +390,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
     sdssSpec: { plate: 287, mjd: 52023, fiber: 510 },
     claimToFame:
-      "A starburst barred spiral on the outskirts of the Virgo Cluster (SH0ES host of SN 1981B).",
+      "A starburst barred spiral on the outskirts of the Virgo Cluster, where stars are forming furiously. A 1981 supernova here helps tie the distance scale.",
     wikipedia: "NGC_4536",
   },
   {
@@ -407,7 +407,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
     sdssSpec: { plate: 1616, mjd: 53169, fiber: 506 },
     claimToFame:
-      "A Virgo Cluster spiral that hosted SN 1990N. One of the longest-baseline SH0ES Cepheid hosts.",
+      "A Virgo Cluster spiral that hosted a 1990 supernova. One of the most distant galaxies in which the Hubble Space Telescope has resolved Cepheid stars.",
     wikipedia: "NGC_4639",
   },
   {
@@ -424,7 +424,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
     sdssSpec: { plate: 327, mjd: 52294, fiber: 472 },
     claimToFame:
-      "Riess+ 2011's flagship SH0ES galaxy — over 250 Cepheids identified by HST. SN 2007af.",
+      "A galaxy where the Hubble Space Telescope measured over 250 Cepheid stars — used as a key calibration target for the cosmic distance ladder. A 2007 supernova here ties it to the wider universe.",
     wikipedia: "NGC_5584",
   },
   {
@@ -440,7 +440,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     vRecKmS: v(0.003851),
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: false },
     claimToFame:
-      "A peculiar barred spiral hosting SN 2013dy, used in the SH0ES distance ladder.",
+      "A peculiar barred spiral that hosted a 2013 supernova, used in the distance ladder.",
     wikipedia: "NGC_7250",
   },
   {
@@ -457,7 +457,7 @@ export const CURATED_GALAXIES: Galaxy[] = [
     capabilities: { cepheidPL: true, lightCurves: false, sdssSpectrum: true },
     sdssSpec: { plate: 790, mjd: 52441, fiber: 403 },
     claimToFame:
-      "One of the furthest galaxies where SH0ES could resolve Cepheids — the upper limit of the Cepheid rung of the ladder.",
+      "One of the furthest galaxies in which the Hubble Space Telescope could resolve individual Cepheid stars — at the very edge of the Cepheid rung of the distance ladder.",
     wikipedia: "UGC_9391",
   },
 
@@ -557,8 +557,121 @@ export const CURATED_GALAXIES: Galaxy[] = [
     capabilities: { cepheidPL: false, lightCurves: false, sdssSpectrum: true },
     sdssSpec: { plate: 421, mjd: 51821, fiber: 519 },
     claimToFame:
-      "The closest Seyfert 2 active galactic nucleus. Strong emission lines make it an ideal practice target for redshift identification.",
+      "A nearby spiral with an actively-feeding supermassive black hole at its centre. Its bright emission lines make it an excellent practice target for redshift identification.",
     wikipedia: "Messier_77",
+  },
+
+  // ============================================================
+  //  Edge-on spirals — pretty in the sky, useful as comparison points
+  // ============================================================
+  {
+    id: "ngc891",
+    name: "NGC 891",
+    altNames: ["UGC 1831"],
+    ra: 35.6392,
+    dec: 42.3492,
+    type: "spiral",
+    distanceMpc: 9.8,
+    distanceMpcErr: 0.5,
+    z: 0.001761,
+    vRecKmS: v(0.001761),
+    capabilities: { ...noCaps },
+    claimToFame:
+      "A textbook edge-on spiral. Its dust lane cuts straight across the disk like a knife — a striking demonstration of the dust between stars.",
+    wikipedia: "NGC_891",
+  },
+  {
+    id: "ngc4565",
+    name: "Needle Galaxy",
+    altNames: ["NGC 4565", "Caldwell 38"],
+    ra: 189.0866,
+    dec: 25.9876,
+    type: "spiral",
+    distanceMpc: 13.5,
+    distanceMpcErr: 0.6,
+    z: 0.004153,
+    vRecKmS: v(0.004153),
+    capabilities: { ...noCaps },
+    claimToFame:
+      "A long, thin, edge-on spiral, nicknamed the Needle for its slender shape. One of the most photogenic galaxies in the northern sky.",
+    wikipedia: "NGC_4565",
+  },
+  {
+    id: "ngc5907",
+    name: "Splinter Galaxy",
+    altNames: ["NGC 5907", "Knife Edge Galaxy"],
+    ra: 228.974,
+    dec: 56.3287,
+    type: "spiral",
+    distanceMpc: 17.0,
+    distanceMpcErr: 0.7,
+    z: 0.002225,
+    vRecKmS: v(0.002225),
+    capabilities: { ...noCaps },
+    claimToFame:
+      "Another edge-on spiral, surrounded by faint shell-like streams left over from a smaller galaxy that it tore apart in the past.",
+    wikipedia: "NGC_5907",
+  },
+
+  // ============================================================
+  //  Stephan's Quintet partner galaxies — context for the NGC 7320
+  //  anomaly. All four sit at z ≈ 0.022, ten times further than the
+  //  foreground NGC 7320 (already in the seed set).
+  // ============================================================
+  {
+    id: "ngc7319",
+    name: "NGC 7319",
+    altNames: ["Stephan's Quintet member"],
+    ra: 339.0144,
+    dec: 33.9763,
+    type: "barred-spiral",
+    distanceMpc: 95.0,
+    distanceMpcErr: 5.0,
+    z: 0.022507,
+    vRecKmS: v(0.022507),
+    capabilities: { ...noCaps },
+    claimToFame:
+      "A barred spiral in Stephan's Quintet, a famous group of five visually-close galaxies. Its redshift is ten times that of NGC 7320, which only looks like part of the group.",
+    wikipedia: "NGC_7319",
+  },
+  {
+    id: "ngc7317",
+    name: "NGC 7317",
+    altNames: ["Stephan's Quintet member"],
+    ra: 338.9809,
+    dec: 33.9489,
+    type: "elliptical",
+    distanceMpc: 89.0,
+    distanceMpcErr: 5.0,
+    z: 0.02234,
+    vRecKmS: v(0.02234),
+    capabilities: { ...noCaps },
+    claimToFame:
+      "A compact elliptical, the smallest of the four genuine Stephan's Quintet members.",
+    wikipedia: "NGC_7317",
+  },
+
+  // ============================================================
+  //  Active-galaxy anomalies
+  // ============================================================
+  {
+    id: "mrk421",
+    name: "Markarian 421",
+    altNames: ["Mrk 421"],
+    ra: 166.1138,
+    dec: 38.2088,
+    type: "agn",
+    distanceMpc: 122.0,
+    distanceMpcErr: 5.0,
+    z: 0.031,
+    vRecKmS: v(0.031),
+    capabilities: { ...noCaps },
+    claimToFame:
+      "A galaxy whose central black hole shoots a jet of charged particles almost straight at us, making it one of the brightest gamma-ray sources in the sky.",
+    wikipedia: "Markarian_421",
+    isAnomaly: true,
+    anomalyExplanation:
+      "Bright in extreme energies (X-rays, gamma rays) but a fairly ordinary galaxy at visible wavelengths — a reminder that 'bright' depends on what kind of light you're looking at.",
   },
 ];
 
@@ -601,6 +714,11 @@ export const GALAXY_SETS: GalaxySet[] = [
       "m87",
       "ngc4258",
       "ngc1365_agn",
+      "ngc891",
+      "ngc4565",
+      "ngc5907",
+      "ngc7319",
+      "ngc7317",
     ],
   },
   {
@@ -641,6 +759,6 @@ export const GALAXY_SETS: GalaxySet[] = [
       "Galaxies that don't fit the simple Hubble's law line — for interesting reasons.",
     markerColor: "#ff7b7b",
     markerShape: "cross",
-    galaxyIds: ["ngc7320", "3c273"],
+    galaxyIds: ["ngc7320", "3c273", "mrk421"],
   },
 ];
