@@ -1,4 +1,5 @@
 import type { Galaxy, PlottedGalaxy } from "../types";
+import { buildThumbnail } from "./galaxyThumbnail";
 
 export interface DataPanelCallbacks {
   onAddToChart?: (galaxy: Galaxy) => void;
@@ -23,18 +24,26 @@ export class DataPanel {
   show(galaxy: Galaxy, plotted: PlottedGalaxy | null): void {
     const wrap = document.createElement("div");
 
+    // Header: thumbnail on the left, name + alt names on the right.
+    const header = document.createElement("div");
+    header.className = "data-panel-header";
+    const thumb = buildThumbnail(galaxy, 110);
+    header.appendChild(thumb);
+
+    const headerText = document.createElement("div");
+    headerText.className = "data-panel-header-text";
     const heading = document.createElement("div");
-    heading.style.fontSize = "16px";
-    heading.style.fontWeight = "600";
+    heading.className = "galaxy-title";
     heading.textContent = galaxy.name;
+    headerText.appendChild(heading);
     if (galaxy.altNames.length) {
-      const sub = document.createElement("span");
+      const sub = document.createElement("div");
       sub.className = "hint";
-      sub.style.marginLeft = "8px";
       sub.textContent = galaxy.altNames.join(", ");
-      heading.appendChild(sub);
+      headerText.appendChild(sub);
     }
-    wrap.appendChild(heading);
+    header.appendChild(headerText);
+    wrap.appendChild(header);
 
     // Capability badges
     const badges = document.createElement("div");

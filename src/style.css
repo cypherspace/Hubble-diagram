@@ -372,6 +372,32 @@ ul.galaxy-list li.added { background: var(--bg); color: var(--accent); }
   font-size: 16px;
 }
 
+/* --- Galaxy thumbnail + data panel header --- */
+.data-panel-header {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.data-panel-header-text { flex: 1; min-width: 0; }
+.galaxy-title { font-size: 16px; font-weight: 600; }
+.galaxy-thumb {
+  flex-shrink: 0;
+  background: var(--bg);
+  border: 1px solid var(--grid);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.galaxy-thumb img { object-fit: cover; }
+.galaxy-thumb-fallback {
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+}
+
 /* --- Headline stats (data panel) — match h-r-diagram styling --- */
 .headline-stat {
   background: var(--panel-2);
