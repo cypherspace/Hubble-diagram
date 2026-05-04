@@ -302,6 +302,51 @@ ul.galaxy-list li {
 ul.galaxy-list li:hover { background: var(--bg); }
 ul.galaxy-list li.added { background: var(--bg); color: var(--accent); }
 
+/* --- Cepheid panel (LaTeX + collapsible) --- */
+.cepheid-panel { display: flex; flex-direction: column; gap: 8px; }
+.cepheid-top-actions {
+  position: sticky;
+  top: -4px;
+  background: var(--panel);
+  padding: 6px 0;
+  z-index: 5;
+  border-bottom: 1px solid var(--grid);
+}
+.cepheid-intro { margin: 0; }
+.cepheid-step {
+  background: var(--panel-2);
+  border-radius: 4px;
+  padding: 6px 10px;
+}
+.cepheid-step > summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  padding: 4px 0;
+  user-select: none;
+}
+.cepheid-step > summary::-webkit-details-marker { display: none; }
+.cepheid-step > summary::before {
+  content: "▶";
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 10px;
+  transform: rotate(0deg);
+  transition: transform 0.12s ease-out;
+  color: var(--muted);
+}
+.cepheid-step[open] > summary::before { transform: rotate(90deg); }
+.cepheid-step-body { padding-top: 6px; }
+.formula-katex { margin: 8px 0; }
+.cepheid-mini-aladin {
+  border: 1px solid var(--grid);
+}
+.cepheid-plot {
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 4px;
+}
+
 /* --- Modal panels (Cepheid / Spectrum / Light-curve) --- */
 .hb-modal-backdrop {
   position: fixed;

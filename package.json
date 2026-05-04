@@ -14,10 +14,12 @@
     "deploy": "npm run build && firebase deploy --only hosting"
   },
   "dependencies": {
-    "d3": "^7.9.0"
+    "d3": "^7.9.0",
+    "katex": "^0.16.45"
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",
+    "@types/katex": "^0.16.8",
     "@types/node": "^22.5.0",
     "firebase-tools": "^15.16.0",
     "tsx": "^4.19.0",
