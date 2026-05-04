@@ -116,8 +116,10 @@ export class SkyViewer {
 
     this.candidateCatalog = A.catalog({
       name: "SDSS search results",
-      sourceSize: 12,
-      color: "#ffd166",
+      // Bright magenta — distinct from yellow anomaly markers and the
+      // yellowish galaxy backgrounds on PanSTARRS imagery.
+      sourceSize: 14,
+      color: "#ff4ec9",
       shape: "plus",
     });
     this.aladin.addCatalog(this.candidateCatalog);

@@ -6,13 +6,20 @@
 :root {
   --bg: #0b1020;
   --bg-2: #11183a;
-  --panel: #161e44;
-  --panel-2: #1b2552;
-  --line: #2a3470;
+  --panel: #131a30;
+  --panel-2: #1a2240;
+  --line: #2a3357;
+  --grid: #2a3357;
   --text: #e6ecff;
-  --text-dim: #9aa6c2;
-  --accent: #6cc4ff;
-  --accent-2: #b78bff;
+  --fg: #e6ecff;
+  --text-dim: #8b95b8;
+  --muted: #8b95b8;
+  /* Match h-r-diagram's accent palette so the two apps feel like a
+     pair. Yellow = headline values, blue/green/violet = info buttons. */
+  --accent: #ffd166;
+  --accent-2: #6cc4ff;
+  --accent-good: #9be7c4;
+  --accent-violet: #d8a8ff;
   --warn: #ffb74d;
   --good: #6dd58c;
   --bad: #ff7b7b;
@@ -61,21 +68,36 @@ header .subtitle {
   border-bottom: 1px solid var(--line);
   flex-wrap: wrap;
 }
+/* Match h-r-diagram: yellow ?Tour, blue How it works, green How we
+   know, violet Diagram guide. Greyed-out (disabled) state for the
+   guide button until the threshold is reached. */
 #action-bar button {
   background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--line);
-  padding: 6px 12px;
+  color: var(--fg);
+  border: 1px solid var(--accent);
   border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  font-size: 13px;
+  font-family: inherit;
 }
-#action-bar button:hover:not(:disabled) {
-  background: var(--panel-2);
+#action-bar button:hover:not(:disabled) { background: #243057; }
+#how-btn { border-color: var(--accent-2); color: var(--accent-2); }
+#how-we-know-btn {
+  border-color: var(--accent-good);
+  color: var(--accent-good);
 }
+#diagram-guide-btn {
+  border-color: var(--accent-violet);
+  color: var(--accent-violet);
+}
+#diagram-guide-btn[disabled],
 #action-bar button:disabled {
-  opacity: 0.5;
+  border-color: var(--grid);
+  color: var(--muted);
+  background: transparent;
   cursor: not-allowed;
+  opacity: 0.55;
 }
 
 main {
@@ -106,6 +128,14 @@ main {
   gap: 12px;
   margin-bottom: 8px;
   align-items: center;
+  /* Reserve space so the sky map doesn't reflow when the status text
+     (`#sky-status`) grows or shrinks during search / add operations. */
+  min-height: 90px;
+}
+#sky-status {
+  flex-basis: 100%;
+  min-height: 1.2em;
+  display: block;
 }
 .control-group {
   display: flex;
@@ -165,10 +195,42 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   overflow: hidden;
 }
 
+/* Diagram fills its panel — flex: 1 + min-height: 0 lets it shrink
+   below its intrinsic content size, so the SVG actually expands to
+   fill the remaining vertical space. */
 #diagram {
   flex: 1;
-  min-height: 380px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
+.hubble-chart-host {
+  flex: 1;
+  min-height: 320px;
+  width: 100%;
+  position: relative;
+  cursor: grab;
+}
+.hubble-chart-host:active { cursor: grabbing; }
+.hubble-svg { display: block; width: 100%; height: 100%; }
+.hubble-svg .axis text { fill: var(--muted); font-size: 11px; }
+.hubble-svg .axis path,
+.hubble-svg .axis line { stroke: var(--muted); }
+.hubble-svg .axis-label { fill: var(--muted); font-size: 12px; }
+.hubble-svg .gridline { stroke: var(--grid); stroke-width: 0.5; opacity: 0.6; }
+.hubble-svg .zero-line { stroke: var(--line); stroke-dasharray: 3,3; }
+.hubble-svg .best-fit-line { stroke: var(--accent-2); stroke-width: 2; opacity: 0.85; }
+.hubble-svg .ref-line { stroke: var(--muted); stroke-dasharray: 5,4; opacity: 0.6; }
+.hubble-svg .ref-label { fill: var(--muted); font-size: 11px; }
+.hubble-svg circle.galaxy { fill: var(--accent-2); stroke: transparent; stroke-width: 2; }
+.hubble-svg circle.galaxy.anomaly { fill: var(--warn); }
+.hubble-svg circle.galaxy.selected { stroke: #ffffff; }
+
+/* Hover affordance on the axis tick areas — so the user knows they
+   can mouse-down there to "hold" that axis for a single-axis zoom. */
+.hubble-svg .x-axis,
+.hubble-svg .y-axis { cursor: ew-resize; }
+.hubble-svg .y-axis { cursor: ns-resize; }
 
 #info-panel h2 {
   font-size: 14px;
@@ -309,5 +371,32 @@ ul.galaxy-list li.added { background: var(--bg); color: var(--accent); }
   font-weight: 600;
   font-size: 16px;
 }
+
+/* --- Headline stats (data panel) — match h-r-diagram styling --- */
+.headline-stat {
+  background: var(--panel-2);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  margin-bottom: 0.35rem;
+}
+.headline-label {
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.headline-value {
+  color: var(--accent);
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-top: 0.1rem;
+}
+.secondary-row {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.4rem 0 0.2rem;
+}
+.secondary-row strong { color: var(--fg); }
 
 a, a:visited { color: var(--link); }

@@ -63,17 +63,24 @@ export class DataPanel {
     claim.textContent = galaxy.claimToFame;
     wrap.appendChild(claim);
 
-    // Numbers
-    const numbers = document.createElement("div");
-    numbers.style.fontSize = "13px";
-    numbers.style.lineHeight = "1.6";
-    numbers.innerHTML = `
-      <div>Type: <strong>${galaxy.type}</strong></div>
-      <div>Distance: <strong>${galaxy.distanceMpc.toFixed(2)} Mpc</strong> ± ${galaxy.distanceMpcErr.toFixed(2)}</div>
-      <div>Redshift z: <strong>${galaxy.z.toExponential(3)}</strong></div>
-      <div>Recession velocity: <strong>${galaxy.vRecKmS} km/s</strong></div>
-    `;
-    wrap.appendChild(numbers);
+    // Highlighted headline numbers, in the same visual treatment that
+    // h-r-diagram uses for temperature / luminosity / distance.
+    wrap.appendChild(
+      headlineStat(
+        "Distance",
+        `${galaxy.distanceMpc.toFixed(2)} Mpc ± ${galaxy.distanceMpcErr.toFixed(2)}`,
+      ),
+    );
+    wrap.appendChild(headlineStat("Redshift z", galaxy.z.toExponential(3)));
+    wrap.appendChild(
+      headlineStat("Recession velocity", `${galaxy.vRecKmS} km/s`),
+    );
+
+    // Galaxy type — secondary, smaller.
+    const typeRow = document.createElement("div");
+    typeRow.className = "secondary-row";
+    typeRow.innerHTML = `Type: <strong>${galaxy.type}</strong>`;
+    wrap.appendChild(typeRow);
 
     if (plotted) {
       const stamp = document.createElement("div");
@@ -168,4 +175,19 @@ function badge(
   s.title = title;
   s.textContent = text + (on ? "" : " (n/a)");
   return s;
+}
+
+// Highlighted headline statistic — same visual treatment as
+// h-r-diagram's "Temperature" / "Brightness" cards.
+function headlineStat(label: string, value: string): HTMLElement {
+  const wrap = document.createElement("div");
+  wrap.className = "headline-stat";
+  const lab = document.createElement("div");
+  lab.className = "headline-label";
+  lab.textContent = label;
+  const val = document.createElement("div");
+  val.className = "headline-value";
+  val.textContent = value;
+  wrap.append(lab, val);
+  return wrap;
 }

@@ -23,7 +23,8 @@ import type { AxisConfig, Galaxy, PlottedGalaxy } from "./types";
 
 const defaultAxes: AxisConfig = {
   yMode: "velocity",
-  range: "default",
+  range: "auto",
+  showNegative: false,
 };
 
 class App {
@@ -87,6 +88,7 @@ class App {
       },
       onClearAll: () => this.clearAll(),
       onClearSelected: () => this.clearSelected(),
+      onResetZoom: () => this.diagram.resetZoom(),
       onSave: (name) => this.save(name),
       onLoad: (name) => this.load(name),
     });
