@@ -18,6 +18,7 @@ import { HowWeKnow } from "./ui/howWeKnow";
 import { DiagramGuide } from "./ui/diagramGuide";
 import { Walkthrough } from "./ui/walkthrough";
 import { Hubble1929Tour } from "./ui/hubble1929Tour";
+import { openModal } from "./ui/modal";
 import { loadDiagram, saveDiagram } from "./store/diagrams";
 import type { AxisConfig, Galaxy, PlottedGalaxy } from "./types";
 
@@ -199,6 +200,38 @@ class App {
         this.skyStatusEl.textContent = `Centred on ${name}.`;
       });
     }
+
+    // "What is this?" tooltip explaining the Jump to shortcuts.
+    const jumpHelp = document.getElementById("jumpto-help-btn");
+    jumpHelp?.addEventListener("click", () => {
+      const { inner } = openModal("Jump-to shortcuts");
+      inner.innerHTML = `
+        <p>These shortcuts will take you directly to some interesting
+        areas of the night sky containing visible galaxies.</p>
+        <p>The <strong>Virgo cluster</strong> is a group of galaxies in
+        relatively close proximity to each other, and relatively close
+        to Earth. Edwin Hubble observed these and used some of them in
+        his original graph.</p>
+	<p>The <strong>Coma cluster</strong> is a group of over 1000 
+	identified galaxies. Along with the Leo cluster it makes the 
+	Coma Supercluster.
+        <p><strong>HDF-N</strong> refers to the Hubble Deep Field —
+        North, a very small area of sky that the Hubble Space Telescope
+        explored in great detail, taking photos over a continuous
+        period of 11 days, finding over 3000 galaxies in a patch of
+        sky that otherwise looks empty. Some of the light from these
+        galaxies is over 13 billion years old.</p>
+        <p><strong>HUDF</strong> is the Hubble <em>Ultra</em> Deep
+        Field, an even more closely explored patch of sky containing
+        over 10,000 galaxies, including the most distant galaxy ever
+        detected.</p>
+        <p>We don't have redshift data for all of these, but try
+        looking at them in the DSS2 (colour) sky map, and then in the
+        HST Press Release Imagery, just to compare what a normal
+        telescope can pick out, compared to the Hubble Space
+        Telescope.</p>
+      `;
+    });
   }
 
   private wireHubble1929Button(): void {

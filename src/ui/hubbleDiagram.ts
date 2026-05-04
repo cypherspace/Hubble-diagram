@@ -108,6 +108,17 @@ export class HubbleDiagram {
   }
 
   setAxes(axes: AxisConfig): void {
+    // When switching the y-axis mode (velocity ↔ redshift) the data
+    // domain changes scale completely (km/s ↔ unitless ~10⁻³). Any
+    // existing y-zoom transform applied to the previous mode would
+    // squash the new data out of view, so reset y zoom on a yMode
+    // change. Same for showNegative — it changes the y-baseline.
+    if (
+      axes.yMode !== this.axes.yMode ||
+      axes.showNegative !== this.axes.showNegative
+    ) {
+      this.yTransform = d3.zoomIdentity;
+    }
     this.axes = axes;
     this.draw();
   }
@@ -265,11 +276,19 @@ export class HubbleDiagram {
     const yVals = data.map((d) => this.yValue(d));
     const showNegative = this.axes.showNegative === true;
 
-    let xMax = data.length ? Math.max(1, ...xVals) : 30;
+    // Default empty-chart extents. Velocity mode wants room out to a
+    // few thousand km/s; redshift mode wants room out to ~0.05. Pick
+    // the placeholder by yMode so the axis ticks read sensibly when
+    // there's no data yet.
+    const emptyYMax = this.axes.yMode === "redshift" ? 0.05 : 15000;
+
+    let xMax = data.length ? Math.max(...xVals) : 30;
+    if (!Number.isFinite(xMax) || xMax <= 0) xMax = 30;
     xMax *= 1.05;
 
     let yMin = 0;
-    let yMax = data.length ? Math.max(...yVals, 1) : 1;
+    let yMax = data.length ? Math.max(...yVals) : emptyYMax;
+    if (!Number.isFinite(yMax) || yMax <= 0) yMax = emptyYMax;
     if (showNegative) {
       yMin = Math.min(0, ...yVals);
     }
