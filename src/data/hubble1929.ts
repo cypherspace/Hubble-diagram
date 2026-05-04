@@ -91,3 +91,25 @@ export function hubble1929GalaxyRecord(g: Hubble1929Galaxy): Galaxy {
     claimToFame: `Plotted by Hubble in 1929 at d = ${g.hubbleDistanceMpc} Mpc, v = ${g.hubbleVelocityKmS} km/s. Modern values: d = ${g.modernDistanceMpc} Mpc, v = ${(g.modernZ * C_KM_S).toFixed(0)} km/s.`,
   };
 }
+
+/** Same id as hubble1929GalaxyRecord (so it replaces the 1929 entry
+ *  in the plotted Map) but uses modern distance + velocity. Used by
+ *  the walkthrough's "let's re-plot with the corrected calibration"
+ *  panel. */
+export function hubble1929ModernRecord(g: Hubble1929Galaxy): Galaxy {
+  const v = +(g.modernZ * C_KM_S).toFixed(0);
+  return {
+    id: `hubble1929-${g.id}`,
+    name: g.displayName,
+    altNames: [],
+    ra: g.ra,
+    dec: g.dec,
+    type: "spiral",
+    distanceMpc: g.modernDistanceMpc,
+    distanceMpcErr: g.modernDistanceMpc * 0.05,
+    z: g.modernZ,
+    vRecKmS: v,
+    capabilities: { cepheidPL: false, lightCurves: false, sdssSpectrum: false },
+    claimToFame: `Modern measurement of a galaxy from Hubble's 1929 paper. d = ${g.modernDistanceMpc} Mpc, v = ${v} km/s.`,
+  };
+}

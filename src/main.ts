@@ -210,11 +210,24 @@ class App {
           this.plotted.set(g.id, g);
           this.refresh();
         },
+        clearHubble1929: () => {
+          for (const id of Array.from(this.plotted.keys())) {
+            if (id.startsWith("hubble1929-")) this.plotted.delete(id);
+          }
+          this.refresh();
+        },
+        getAxes: () => this.axes,
+        setAxes: (axes) => {
+          this.axes = axes;
+          this.controls.setAxes(axes);
+          this.diagram.setAxes(axes);
+        },
+        getPlotted: () => Array.from(this.plotted.values()),
         onClose: () => {
           this.skyStatusEl.textContent = "Hubble's 1929 tour finished.";
         },
       });
-      tour.start();
+      void tour.start();
     });
   }
 

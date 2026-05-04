@@ -317,6 +317,73 @@ export class SkyViewer {
     this.aladin.gotoRaDec(ra, dec);
     if (this.aladin.setFov) this.aladin.setFov(fovDeg);
   }
+
+  /**
+   * Slowly pan + zoom-out + zoom-in to a target. Used by the
+   * Hubble's-1929 walkthrough to give the student time to register
+   * where the next galaxy lives in the sky.
+   *
+   * Animation curve:
+   *  - First half of duration: zoom out from current FOV to a wide
+   *    "context" FOV (max(start, target) × 4, capped at 60°),
+   *    panning halfway toward the target.
+   *  - Second half: continue panning to the target while zooming
+   *    back in to the target FOV.
+   *
+   * Stepped via requestAnimationFrame at ~60 fps. Returns when the
+   * animation is complete; safe to call multiple times in sequence.
+   */
+  async animateRaDecFov(
+    ra: number,
+    dec: number,
+    fovDeg: number,
+    durationMs: number,
+  ): Promise<void> {
+    await this.ready;
+    if (!this.aladin || !this.aladin.setFov) {
+      // Fall back to instant goto if animation primitives aren't
+      // available.
+      this.aladin?.gotoRaDec(ra, dec);
+      return;
+    }
+    const startCenter = this.aladin.getRaDec();
+    const startFov = Math.max(0.1, this.aladin.getFov()[0] ?? 30);
+    const endRa = ra;
+    const endDec = dec;
+    const endFov = Math.max(0.05, fovDeg);
+    // RA wraps at 360° — pick the shorter direction.
+    let raDelta = endRa - startCenter[0];
+    if (raDelta > 180) raDelta -= 360;
+    if (raDelta < -180) raDelta += 360;
+    const wideFov = Math.min(
+      60,
+      Math.max(startFov, endFov) * 4,
+    );
+
+    const start = performance.now();
+    return new Promise<void>((resolve) => {
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / durationMs);
+        // Ease-in-out cubic.
+        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const ra = startCenter[0] + raDelta * eased;
+        const dec = startCenter[1] + (endDec - startCenter[1]) * eased;
+        let fov: number;
+        if (eased < 0.5) {
+          const u = eased * 2;
+          fov = startFov + (wideFov - startFov) * u;
+        } else {
+          const u = (eased - 0.5) * 2;
+          fov = wideFov + (endFov - wideFov) * u;
+        }
+        this.aladin!.gotoRaDec(ra, dec);
+        this.aladin!.setFov!(fov);
+        if (t < 1) requestAnimationFrame(step);
+        else resolve();
+      };
+      requestAnimationFrame(step);
+    });
+  }
 }
 
 async function waitForAladin(timeoutMs = 8000): Promise<AladinNamespace | null> {

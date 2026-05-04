@@ -81,7 +81,16 @@ export class Controls {
       this.axes = { ...this.axes, showNegative: showNeg.input.checked };
       this.cb.onAxesChange(this.axes);
     });
-    visGroup.appendChild(showNeg.label);
+    const showRef = checkbox(
+      "show-ref-line",
+      "Accepted H₀ line (70 km/s/Mpc)",
+      this.axes.showRefLine === true,
+    );
+    showRef.input.addEventListener("change", () => {
+      this.axes = { ...this.axes, showRefLine: showRef.input.checked };
+      this.cb.onAxesChange(this.axes);
+    });
+    visGroup.append(showNeg.label, showRef.label);
     this.el.appendChild(visGroup);
 
     const actionGroup = group("Diagram");

@@ -116,6 +116,11 @@ export interface AxisConfig {
   // galaxies (Andromeda, M33 etc.) are visible. Off by default — the
   // basic Hubble's-law story is that v ≥ 0.
   showNegative?: boolean;
+  // When true, the published H₀ = 70 km/s/Mpc reference line is
+  // overlaid on the chart and the readout shows "X% above/below
+  // published value." Off by default so the student finds the value
+  // themselves first.
+  showRefLine?: boolean;
 }
 
 export interface SavedDiagram {

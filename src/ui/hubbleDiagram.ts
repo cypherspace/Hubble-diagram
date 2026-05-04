@@ -396,8 +396,10 @@ export class HubbleDiagram {
       this.h0Readout.innerHTML = `<span class="hint">Add at least two galaxies to see your measured Hubble constant.</span>`;
     }
 
-    // Reference line at the published H₀.
-    {
+    // Reference line at the published H₀ — only when explicitly
+    // toggled on. Otherwise the student finds the value themselves
+    // and we don't telegraph the answer.
+    if (this.axes.showRefLine) {
       const xEnd = xScale.invert(innerW);
       const refSlope = H0_PUBLISHED_KM_S_MPC;
       const refYEnd =
@@ -443,14 +445,22 @@ export class HubbleDiagram {
   }
 
   private renderH0Readout(h0: number, rms: number, n: number): void {
-    const diff = h0 - H0_PUBLISHED_KM_S_MPC;
-    const diffPct = (Math.abs(diff) / H0_PUBLISHED_KM_S_MPC) * 100;
-    this.h0Readout.innerHTML = `
-      <div>
+    // The "X% above/below the published value" line only appears when
+    // the user has explicitly toggled the published-H₀ reference line
+    // on. Otherwise we show only the raw slope so the student isn't
+    // told the answer before they've measured it.
+    const slope = `<div>
         Your best-fit slope:
         <span class="h0-value">${h0.toFixed(1)} km/s/Mpc</span>
         &nbsp;<span class="hint">(${n} galaxies, scatter ${rms.toFixed(0)} km/s)</span>
-      </div>
+      </div>`;
+    if (!this.axes.showRefLine) {
+      this.h0Readout.innerHTML = slope;
+      return;
+    }
+    const diff = h0 - H0_PUBLISHED_KM_S_MPC;
+    const diffPct = (Math.abs(diff) / H0_PUBLISHED_KM_S_MPC) * 100;
+    this.h0Readout.innerHTML = `${slope}
       <div class="hint">
         Published value: ${H0_PUBLISHED_KM_S_MPC} km/s/Mpc — you're
         ${diffPct.toFixed(1)}% ${diff > 0 ? "above" : "below"}.
