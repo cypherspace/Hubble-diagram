@@ -219,41 +219,44 @@ class App {
   }
 
   private renderGalaxySets(): void {
+    // Render the per-category galaxy lists using the same class names
+    // as h-r-diagram's STAR_SETS (.star-set / .set-stars / .set-label)
+    // so the two apps can share styles.
     this.galaxySetsContainer.replaceChildren();
     for (const set of GALAXY_SETS) {
       const details = document.createElement("details");
+      details.className = "star-set";
       const summary = document.createElement("summary");
       const swatch = document.createElement("span");
       swatch.className = "set-swatch";
       swatch.style.background = set.markerColor;
-      summary.appendChild(swatch);
-      summary.appendChild(document.createTextNode(` ${set.label} `));
+      const label = document.createElement("span");
+      label.className = "set-label";
+      label.textContent = set.label;
       const count = document.createElement("span");
-      count.className = "hint";
-      count.textContent = `(${set.galaxyIds.length})`;
-      summary.appendChild(count);
+      count.className = "set-count";
+      count.textContent = String(set.galaxyIds.length);
+      summary.append(swatch, label, count);
       details.appendChild(summary);
 
       const desc = document.createElement("p");
-      desc.className = "hint";
-      desc.style.margin = "4px 0";
+      desc.className = "set-description";
       desc.textContent = set.description;
       details.appendChild(desc);
 
+      const setActions = document.createElement("div");
+      setActions.className = "set-actions";
       const addAll = document.createElement("button");
       addAll.type = "button";
       addAll.textContent = "Add all to chart";
-      addAll.style.marginRight = "6px";
       addAll.addEventListener("click", () => {
         for (const id of set.galaxyIds) {
           const g = findGalaxyById(id);
           if (g) this.addCurated(g);
         }
       });
-      details.appendChild(addAll);
-
       const visToggle = document.createElement("label");
-      visToggle.className = "control-pair";
+      visToggle.className = "set-vis";
       const cb = document.createElement("input");
       cb.type = "checkbox";
       cb.checked = true;
@@ -261,10 +264,11 @@ class App {
         this.skyViewer.setSetVisibility(set.id, cb.checked);
       });
       visToggle.append(cb, document.createTextNode(" Show on sky"));
-      details.appendChild(visToggle);
+      setActions.append(addAll, visToggle);
+      details.appendChild(setActions);
 
       const list = document.createElement("ul");
-      list.className = "galaxy-list";
+      list.className = "set-stars";
       for (const id of set.galaxyIds) {
         const g = findGalaxyById(id);
         if (!g) continue;

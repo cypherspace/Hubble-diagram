@@ -32,41 +32,51 @@ html, body {
   margin: 0;
   padding: 0;
   background: var(--bg);
-  color: var(--text);
+  color: var(--fg);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 14px;
   height: 100%;
+  overflow: hidden;
 }
 
+/* Same grid layout as h-r-diagram so the title and action buttons
+   sit on a single row, with the main three-pane content below. */
 #app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  display: grid;
+  grid-template-areas:
+    "header  actions"
+    "main    main";
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  padding: 0.75rem;
+  gap: 0.75rem;
+  overflow: hidden;
 }
+header { grid-area: header; }
+#action-bar { grid-area: actions; align-self: center; }
+main { grid-area: main; }
 
 header {
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--line);
-  background: var(--bg-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 header h1 {
-  margin: 0;
-  font-size: 18px;
+  margin: 0 0 0.2rem;
+  font-size: 1.3rem;
   font-weight: 600;
 }
 header .subtitle {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--text-dim);
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
+.header-buttons,
 #action-bar {
   display: flex;
-  gap: 8px;
-  padding: 8px 20px;
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--line);
-  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 /* Match h-r-diagram: yellow ?Tour, blue How it works, green How we
    know, violet Diagram guide. Greyed-out (disabled) state for the
@@ -100,111 +110,202 @@ header .subtitle {
   opacity: 0.55;
 }
 
+/* Three-pane content area — sky on the left, diagram in the middle,
+   info on the right. Same proportions as h-r-diagram. */
 main {
-  flex: 1;
   display: grid;
-  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr) minmax(280px, 320px);
-  gap: 12px;
-  padding: 12px;
+  grid-template-columns: 1fr 1fr 280px;
+  gap: 0.75rem;
+  flex: 1;
   min-height: 0;
 }
-/* Tablet / narrow desktop — collapse to a single column but keep
-   each panel readable. Aladin and the chart get explicit min-heights
-   so they don't squash to nothing. */
+
 @media (max-width: 1100px) {
-  main { grid-template-columns: 1fr; }
-  #sky-panel, #diagram-panel, #info-panel { min-height: 420px; }
-  #aladin-lite-div { min-height: 420px; }
-  .hubble-chart-host { min-height: 380px; }
+  main { grid-template-columns: 1fr 1fr; }
+  #info-panel { grid-column: 1 / -1; }
 }
-/* Phone — stack everything vertically, shrink padding. */
-@media (max-width: 640px) {
-  main { padding: 6px; gap: 6px; }
-  #sky-panel, #diagram-panel, #info-panel { padding: 6px; }
-  header h1 { font-size: 16px; }
-  header .subtitle { font-size: 12px; }
-  #action-bar { padding: 6px 10px; gap: 4px; }
+@media (max-width: 720px) {
+  /* Mobile: single column, panes stack top-down, page scrolls. */
+  html, body { overflow: auto; height: auto; }
+  #app {
+    grid-template-areas: "header" "main" "actions";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+  main { grid-template-columns: 1fr; }
+  #info-panel { grid-column: auto; }
+  #sky-panel #aladin-lite-div { min-height: 60vh; }
+  #diagram-panel #diagram { min-height: 50vh; }
+  aside { overflow-y: visible; }
+  #action-bar {
+    align-self: stretch;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0.5rem 0 0.25rem;
+    border-top: 1px solid var(--grid);
+  }
+  header h1 { font-size: 1.15rem; }
+  .subtitle { font-size: 0.78rem; }
 }
 
-#sky-panel, #diagram-panel, #info-panel {
+/* Panel base — same as h-r-diagram (no borders, just rounded
+   panel-coloured backgrounds). */
+section, aside {
   background: var(--panel);
-  border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 10px;
-  min-height: 480px;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+aside {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
+/* Sky-panel controls — single flowing flex row that wraps as needed.
+   Mirrors h-r-diagram exactly so the two apps feel identical. */
 #sky-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 0.5rem;
   align-items: center;
-  /* Reserve space so the sky map doesn't reflow when the status text
-     (`#sky-status`) grows or shrinks during search / add operations. */
-  min-height: 90px;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  /* Reserve a sensible minimum so the sky map doesn't reflow as the
+     status text grows or shrinks during search / add operations. */
+  min-height: 7rem;
 }
+#sky-controls input,
+#sky-controls select,
+#sky-controls button {
+  background: var(--panel-2);
+  color: var(--fg);
+  border: 1px solid var(--grid);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+}
+#sky-controls button { cursor: pointer; }
+#sky-controls button:hover { background: #243057; }
+#sky-controls button.primary {
+  background: var(--accent);
+  color: #0c1326;
+  border-color: var(--accent);
+  font-weight: 600;
+  padding: 0.3rem 0.85rem;
+}
+#sky-controls button.primary:hover {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+#sky-controls input[type="number"] { width: 4rem; }
+#sky-controls input[type="text"] { width: 9rem; }
+#sky-controls input[type="checkbox"] { margin-right: 0.25rem; }
 #sky-status {
-  flex-basis: 100%;
-  min-height: 1.2em;
-  display: block;
+  margin-left: auto;
+  color: var(--muted);
 }
 .control-group {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
   align-items: center;
-  gap: 6px;
-  background: var(--panel-2);
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  border: 1px solid var(--grid);
 }
 .control-group-heading {
-  font-size: 11px;
+  color: var(--accent);
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-dim);
+  letter-spacing: 0.07em;
+  font-weight: 600;
+  margin-right: 0.4rem;
+  min-width: 5rem;
 }
 .control-pair {
-  display: flex;
-  gap: 4px;
+  display: inline-flex;
   align-items: center;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.8rem;
 }
 .control-divider {
   width: 1px;
-  height: 16px;
-  background: var(--line);
-  margin: 0 2px;
+  height: 1.4rem;
+  background: var(--grid);
+  margin: 0 0.2rem;
 }
 input[type="text"], input[type="number"], select {
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--line);
-  padding: 4px 6px;
-  border-radius: 3px;
-  font-size: 13px;
+  background: var(--panel-2);
+  color: var(--fg);
+  border: 1px solid var(--grid);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-family: inherit;
 }
 button {
   background: var(--panel);
-  color: var(--text);
-  border: 1px solid var(--line);
-  padding: 4px 10px;
-  border-radius: 3px;
+  color: var(--fg);
+  border: 1px solid var(--grid);
+  padding: 0.25rem 0.7rem;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.82rem;
+  font-family: inherit;
 }
-button:hover:not(:disabled) { background: var(--panel-2); }
+button:hover:not(:disabled) { background: #243057; }
 button.primary {
   background: var(--accent);
-  color: #042a4a;
+  color: #0c1326;
   border-color: var(--accent);
   font-weight: 600;
 }
+button.primary:hover:not(:disabled) {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
+#diagram-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+#diagram-controls select,
+#diagram-controls button,
+#diagram-controls input[type="text"] {
+  background: var(--panel-2);
+  color: var(--fg);
+  border: 1px solid var(--grid);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+}
+#diagram-controls button { cursor: pointer; }
+#diagram-controls button:hover { background: #243057; }
+#graph-options { margin-top: 0.5rem; }
+#graph-options summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.82rem;
+  padding: 0.2rem 0;
+}
 #aladin-lite-div {
   flex: 1;
-  min-height: 380px;
+  min-height: 320px;
+  background: #000;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -246,21 +347,23 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .hubble-svg .y-axis { cursor: ew-resize; }
 .hubble-svg .y-axis { cursor: ns-resize; }
 
-#info-panel h2 {
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-dim);
-  margin: 0 0 8px;
+#info-panel h2,
+h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
 }
 #data-panel {
   background: var(--panel-2);
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 10px;
+  padding: 0.6rem 0.7rem;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
   min-height: 80px;
 }
-.hint { color: var(--text-dim); font-size: 13px; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 0; }
 
 /* --- Capability badges on galaxy markers + data panel --- */
 .cap-badges {
@@ -279,42 +382,102 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .cap-badge.on { color: var(--accent); border-color: var(--accent); }
 .cap-badge.anomaly { color: var(--warn); border-color: var(--warn); }
 
-/* --- Galaxy list --- */
-#galaxy-sets details {
-  margin-bottom: 8px;
-  background: var(--panel-2);
-  border-radius: 4px;
-  padding: 6px;
+/* --- Galaxy sets (right info panel) — same look as h-r-diagram --- */
+#galaxy-sets {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
-#galaxy-sets summary {
+.star-set {
+  background: var(--panel-2);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+}
+.star-set summary {
   cursor: pointer;
-  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.5rem;
+  list-style: none;
 }
+.star-set summary::-webkit-details-marker { display: none; }
+.star-set summary::before {
+  content: "▸";
+  color: var(--muted);
+  font-size: 0.7rem;
+  transition: transform 0.15s ease;
+}
+.star-set[open] summary::before { transform: rotate(90deg); }
 .set-swatch {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
-ul.galaxy-list {
+.set-label { flex: 1; color: var(--fg); }
+.set-count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 0 0.45rem;
+}
+.set-description {
+  margin: 0.4rem 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+.set-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+.set-actions button {
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.set-actions button:hover { background: #243057; }
+.set-vis {
+  color: var(--muted);
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.set-stars {
   list-style: none;
   padding: 0;
-  margin: 8px 0 0;
-  max-height: 220px;
-  overflow-y: auto;
+  margin: 0;
 }
-ul.galaxy-list li {
-  padding: 3px 6px;
-  border-radius: 3px;
+.set-stars li {
+  padding: 0.25rem 0.5rem;
+  margin: 0.1rem 0;
+  background: var(--panel);
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
 }
-ul.galaxy-list li:hover { background: var(--bg); }
-ul.galaxy-list li.added { background: var(--bg); color: var(--accent); }
+.set-stars li:hover { background: #243057; }
+.set-stars li.added { opacity: 0.5; }
+.set-stars li .meta {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: right;
+}
 
 /* --- Diagram frames inside How we know --- */
 .hwk-diagram {
