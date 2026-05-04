@@ -18,6 +18,7 @@ import { HowItWorks } from "./ui/howItWorks";
 import { HowWeKnow } from "./ui/howWeKnow";
 import { DiagramGuide } from "./ui/diagramGuide";
 import { Walkthrough } from "./ui/walkthrough";
+import { Hubble1929Tour } from "./ui/hubble1929Tour";
 import { loadDiagram, saveDiagram } from "./store/diagrams";
 import type { AxisConfig, Galaxy, PlottedGalaxy } from "./types";
 
@@ -111,6 +112,7 @@ class App {
 
     this.wireSkyControls();
     this.renderGalaxySets();
+    this.wireHubble1929Button();
     this.refresh();
   }
 
@@ -198,6 +200,23 @@ class App {
         this.skyStatusEl.textContent = `Centred on ${name}.`;
       });
     }
+  }
+
+  private wireHubble1929Button(): void {
+    const btn = document.getElementById("hubble1929-btn");
+    btn?.addEventListener("click", () => {
+      const tour = new Hubble1929Tour({
+        skyViewer: this.skyViewer,
+        plotGalaxy: (g) => {
+          this.plotted.set(g.id, g);
+          this.refresh();
+        },
+        onClose: () => {
+          this.skyStatusEl.textContent = "Hubble's 1929 tour finished.";
+        },
+      });
+      tour.start();
+    });
   }
 
   private renderGalaxySets(): void {
