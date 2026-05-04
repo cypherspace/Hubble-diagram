@@ -22,6 +22,14 @@ interface AladinCatalog {
 
 interface AladinInstance {
   setImageSurvey: (survey: string) => void;
+  // Aladin Lite v3: stack a second HiPS as an overlay layer on top of
+  // the base survey. Pass a survey identifier (e.g. "P/HST/EPO") and
+  // optional opacity 0..1.
+  setOverlayImageLayer?: (
+    survey: string | { id?: string; url?: string; name?: string } | null,
+    opacity?: number,
+  ) => void;
+  removeOverlayImageLayer?: (id?: string) => void;
   gotoObject: (
     name: string,
     options?: {
@@ -30,6 +38,7 @@ interface AladinInstance {
     },
   ) => void;
   gotoRaDec: (ra: number, dec: number) => void;
+  setFov?: (fovDeg: number) => void;
   getRaDec: () => [number, number];
   getFov: () => [number, number];
   addCatalog: (cat: AladinCatalog) => void;
@@ -116,8 +125,10 @@ export class SkyViewer {
 
     this.candidateCatalog = A.catalog({
       name: "SDSS search results",
-      sourceSize: 12,
-      color: "#ffd166",
+      // Bright magenta — distinct from yellow anomaly markers and the
+      // yellowish galaxy backgrounds on PanSTARRS imagery.
+      sourceSize: 14,
+      color: "#ff4ec9",
       shape: "plus",
     });
     this.aladin.addCatalog(this.candidateCatalog);
@@ -273,6 +284,105 @@ export class SkyViewer {
   async setSurvey(survey: string): Promise<void> {
     await this.ready;
     this.aladin?.setImageSurvey(survey);
+  }
+
+  /**
+   * Toggle a layered Hubble Space Telescope overlay on top of whatever
+   * the base survey is. Aladin Lite v3 layers HST tiles transparently
+   * outside their footprint, so non-HST regions still show the base
+   * survey through the overlay.
+   */
+  async setHstOverlayVisible(on: boolean): Promise<void> {
+    await this.ready;
+    if (!this.aladin) return;
+    if (on && this.aladin.setOverlayImageLayer) {
+      this.aladin.setOverlayImageLayer("P/HST/EPO", 0.7);
+    } else if (this.aladin.removeOverlayImageLayer) {
+      this.aladin.removeOverlayImageLayer();
+    }
+  }
+
+  /**
+   * Centre the view on (ra, dec) and zoom to a specific field of view.
+   * Used by the preset "Jump to" buttons (HDF-N, HUDF etc.) to land at
+   * a sensible scale rather than relying on the default zoom.
+   */
+  async gotoRaDecFov(
+    ra: number,
+    dec: number,
+    fovDeg: number,
+  ): Promise<void> {
+    await this.ready;
+    if (!this.aladin) return;
+    this.aladin.gotoRaDec(ra, dec);
+    if (this.aladin.setFov) this.aladin.setFov(fovDeg);
+  }
+
+  /**
+   * Slowly pan + zoom-out + zoom-in to a target. Used by the
+   * Hubble's-1929 walkthrough to give the student time to register
+   * where the next galaxy lives in the sky.
+   *
+   * Animation curve:
+   *  - First half of duration: zoom out from current FOV to a wide
+   *    "context" FOV (max(start, target) × 4, capped at 60°),
+   *    panning halfway toward the target.
+   *  - Second half: continue panning to the target while zooming
+   *    back in to the target FOV.
+   *
+   * Stepped via requestAnimationFrame at ~60 fps. Returns when the
+   * animation is complete; safe to call multiple times in sequence.
+   */
+  async animateRaDecFov(
+    ra: number,
+    dec: number,
+    fovDeg: number,
+    durationMs: number,
+  ): Promise<void> {
+    await this.ready;
+    if (!this.aladin || !this.aladin.setFov) {
+      // Fall back to instant goto if animation primitives aren't
+      // available.
+      this.aladin?.gotoRaDec(ra, dec);
+      return;
+    }
+    const startCenter = this.aladin.getRaDec();
+    const startFov = Math.max(0.1, this.aladin.getFov()[0] ?? 30);
+    const endRa = ra;
+    const endDec = dec;
+    const endFov = Math.max(0.05, fovDeg);
+    // RA wraps at 360° — pick the shorter direction.
+    let raDelta = endRa - startCenter[0];
+    if (raDelta > 180) raDelta -= 360;
+    if (raDelta < -180) raDelta += 360;
+    const wideFov = Math.min(
+      60,
+      Math.max(startFov, endFov) * 4,
+    );
+
+    const start = performance.now();
+    return new Promise<void>((resolve) => {
+      const step = (now: number) => {
+        const t = Math.min(1, (now - start) / durationMs);
+        // Ease-in-out cubic.
+        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const ra = startCenter[0] + raDelta * eased;
+        const dec = startCenter[1] + (endDec - startCenter[1]) * eased;
+        let fov: number;
+        if (eased < 0.5) {
+          const u = eased * 2;
+          fov = startFov + (wideFov - startFov) * u;
+        } else {
+          const u = (eased - 0.5) * 2;
+          fov = wideFov + (endFov - wideFov) * u;
+        }
+        this.aladin!.gotoRaDec(ra, dec);
+        this.aladin!.setFov!(fov);
+        if (t < 1) requestAnimationFrame(step);
+        else resolve();
+      };
+      requestAnimationFrame(step);
+    });
   }
 }
 

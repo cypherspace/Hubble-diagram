@@ -105,11 +105,22 @@ export interface PlottedGalaxy extends Galaxy {
 }
 
 export type YAxisMode = "velocity" | "redshift";
-export type AxisRange = "default" | "extreme"; // toggles inclusion of high-z galaxies
+// "auto"     — show every plotted galaxy (default, post-improvements).
+// "localOnly" — clamp to <= 200 Mpc (quick way to hide deep-field outliers).
+export type AxisRange = "auto" | "localOnly";
 
 export interface AxisConfig {
   yMode: YAxisMode;
   range: AxisRange;
+  // When true, the y-axis dips below zero so blueshifted Local Group
+  // galaxies (Andromeda, M33 etc.) are visible. Off by default — the
+  // basic Hubble's-law story is that v ≥ 0.
+  showNegative?: boolean;
+  // When true, the published H₀ = 70 km/s/Mpc reference line is
+  // overlaid on the chart and the readout shows "X% above/below
+  // published value." Off by default so the student finds the value
+  // themselves first.
+  showRefLine?: boolean;
 }
 
 export interface SavedDiagram {

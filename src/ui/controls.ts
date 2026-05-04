@@ -4,14 +4,15 @@ export interface ControlsCallbacks {
   onAxesChange: (axes: AxisConfig) => void;
   onClearAll: () => void;
   onClearSelected: () => void;
+  onResetZoom: () => void;
   onSave: (name: string) => void;
   onLoad: (name: string) => void;
 }
 
-// Minimal control surface. Linear axes only — the only axis-related
-// toggles are y-units (velocity vs redshift) and a "show extreme
-// distances" range toggle that lets the high-z deep-field galaxies
-// onto the chart.
+// Linear axes only. Auto-scaling on by default; the radio-style range
+// toggle is now a "Local universe" override that clamps to <= 200 Mpc.
+// "Show negative velocities" lets blueshifted Local Group galaxies
+// drop below the y=0 line.
 export class Controls {
   private el: HTMLElement;
   private axes: AxisConfig;
@@ -47,33 +48,56 @@ export class Controls {
     this.el.appendChild(yGroup);
 
     const rangeGroup = group("Range");
-    const rangeDefault = radio(
+    const rangeAuto = radio(
       "range",
-      "default",
-      "Local universe",
-      this.axes.range === "default",
+      "auto",
+      "Auto-scale",
+      this.axes.range === "auto",
     );
-    const rangeExtreme = radio(
+    const rangeLocal = radio(
       "range",
-      "extreme",
-      "Include deep-field",
-      this.axes.range === "extreme",
+      "localOnly",
+      "Local universe (≤200 Mpc)",
+      this.axes.range === "localOnly",
     );
-    rangeDefault.input.addEventListener("change", () => {
-      this.axes = { ...this.axes, range: "default" };
+    rangeAuto.input.addEventListener("change", () => {
+      this.axes = { ...this.axes, range: "auto" };
       this.cb.onAxesChange(this.axes);
     });
-    rangeExtreme.input.addEventListener("change", () => {
-      this.axes = { ...this.axes, range: "extreme" };
+    rangeLocal.input.addEventListener("change", () => {
+      this.axes = { ...this.axes, range: "localOnly" };
       this.cb.onAxesChange(this.axes);
     });
-    rangeGroup.append(rangeDefault.label, rangeExtreme.label);
+    rangeGroup.append(rangeAuto.label, rangeLocal.label);
     this.el.appendChild(rangeGroup);
+
+    const visGroup = group("Show");
+    const showNeg = checkbox(
+      "show-negative",
+      "Negative velocities (blueshifts)",
+      this.axes.showNegative === true,
+    );
+    showNeg.input.addEventListener("change", () => {
+      this.axes = { ...this.axes, showNegative: showNeg.input.checked };
+      this.cb.onAxesChange(this.axes);
+    });
+    const showRef = checkbox(
+      "show-ref-line",
+      "Accepted H₀ line (70 km/s/Mpc)",
+      this.axes.showRefLine === true,
+    );
+    showRef.input.addEventListener("change", () => {
+      this.axes = { ...this.axes, showRefLine: showRef.input.checked };
+      this.cb.onAxesChange(this.axes);
+    });
+    visGroup.append(showNeg.label, showRef.label);
+    this.el.appendChild(visGroup);
 
     const actionGroup = group("Diagram");
     const clearAll = button("Clear all", () => this.cb.onClearAll());
     const clearOne = button("Clear selected", () => this.cb.onClearSelected());
-    actionGroup.append(clearAll, clearOne);
+    const resetZoom = button("Reset zoom", () => this.cb.onResetZoom());
+    actionGroup.append(clearAll, clearOne, resetZoom);
     this.el.appendChild(actionGroup);
 
     const saveGroup = group("Save / load");
@@ -116,6 +140,21 @@ function radio(
   input.type = "radio";
   input.name = name;
   input.value = value;
+  input.checked = checked;
+  label.append(input, document.createTextNode(" " + text));
+  return { label, input };
+}
+
+function checkbox(
+  name: string,
+  text: string,
+  checked: boolean,
+): { label: HTMLLabelElement; input: HTMLInputElement } {
+  const label = document.createElement("label");
+  label.className = "control-pair";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.name = name;
   input.checked = checked;
   label.append(input, document.createTextNode(" " + text));
   return { label, input };

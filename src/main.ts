@@ -2,10 +2,9 @@ import "./style.css";
 import { CURATED_GALAXIES, GALAXY_SETS, findGalaxyById } from "./data/galaxies";
 import { C_KM_S } from "./data/derive";
 import {
-  searchSdssGalaxies,
-  sdssRowToGalaxy,
-  type SdssGalaxyRow,
-} from "./data/sdssGalaxies";
+  searchGalaxies,
+  searchedGalaxyToGalaxy,
+} from "./data/galaxySearch";
 import { VizierError } from "./data/vizier";
 import { HubbleDiagram } from "./ui/hubbleDiagram";
 import { Controls } from "./ui/controls";
@@ -18,12 +17,14 @@ import { HowItWorks } from "./ui/howItWorks";
 import { HowWeKnow } from "./ui/howWeKnow";
 import { DiagramGuide } from "./ui/diagramGuide";
 import { Walkthrough } from "./ui/walkthrough";
+import { Hubble1929Tour } from "./ui/hubble1929Tour";
 import { loadDiagram, saveDiagram } from "./store/diagrams";
 import type { AxisConfig, Galaxy, PlottedGalaxy } from "./types";
 
 const defaultAxes: AxisConfig = {
   yMode: "velocity",
-  range: "default",
+  range: "auto",
+  showNegative: false,
 };
 
 class App {
@@ -36,10 +37,10 @@ class App {
   private skyViewer: SkyViewer;
   private galaxySetsContainer: HTMLElement;
   private skyStatusEl: HTMLElement;
-  // Galaxies returned by the most recent SDSS search. Live in-memory
-  // only — they're shown as candidate markers on the sky and merged
-  // into `findGalaxyById` lookups via `searchResults`.
-  private searchResults = new Map<string, ReturnType<typeof sdssRowToGalaxy>>();
+  // Galaxies returned by the most recent SDSS / 2MRS search. Live in-
+  // memory only — they're shown as candidate markers on the sky and
+  // merged into `findGalaxyById` lookups via `searchResults`.
+  private searchResults = new Map<string, Galaxy>();
   private inflightSearch: AbortController | null = null;
 
   constructor() {
@@ -87,6 +88,7 @@ class App {
       },
       onClearAll: () => this.clearAll(),
       onClearSelected: () => this.clearSelected(),
+      onResetZoom: () => this.diagram.resetZoom(),
       onSave: (name) => this.save(name),
       onLoad: (name) => this.load(name),
     });
@@ -109,6 +111,7 @@ class App {
 
     this.wireSkyControls();
     this.renderGalaxySets();
+    this.wireHubble1929Button();
     this.refresh();
   }
 
@@ -131,8 +134,29 @@ class App {
     gotoInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") fire();
     });
+    // Restore the user's last-chosen sky picture, if any.
+    try {
+      const saved = localStorage.getItem("hubble-diagram.survey");
+      if (saved) {
+        const opt = surveySelect.querySelector(
+          `option[value="${CSS.escape(saved)}"]`,
+        );
+        if (opt) {
+          surveySelect.value = saved;
+          void this.skyViewer.setSurvey(saved);
+        }
+      }
+    } catch {
+      /* localStorage may be unavailable in some embedding contexts */
+    }
     surveySelect.addEventListener("change", () => {
-      void this.skyViewer.setSurvey(surveySelect.value);
+      const v = surveySelect.value;
+      void this.skyViewer.setSurvey(v);
+      try {
+        localStorage.setItem("hubble-diagram.survey", v);
+      } catch {
+        /* ignore */
+      }
     });
     searchBtn.addEventListener("click", () => {
       const limit = clamp(parseInt(regionLimit.value, 10) || 50, 1, 500);
@@ -150,44 +174,102 @@ class App {
     showMapInfo.addEventListener("change", () => {
       document.body.classList.toggle("view-info-open", showMapInfo.checked);
     });
+
+    // HST overlay checkbox.
+    const hstOverlay = document.getElementById(
+      "opt-hst-overlay",
+    ) as HTMLInputElement | null;
+    hstOverlay?.addEventListener("change", () => {
+      void this.skyViewer.setHstOverlayVisible(hstOverlay.checked);
+    });
+
+    // "Jump to" preset buttons. FOV values chosen so the deep fields
+    // fill roughly half the panel; cluster jumps are zoomed out
+    // enough to see member galaxies.
+    const presets: Array<[string, number, number, number, string]> = [
+      ["goto-hdfn-btn", 189.21, 62.22, 0.1, "Hubble Deep Field North"],
+      ["goto-hudf-btn", 53.16, -27.79, 0.1, "Hubble Ultra Deep Field"],
+      ["goto-coma-btn", 194.94, 27.94, 1.5, "Coma Cluster"],
+      ["goto-virgo-btn", 187.7, 12.39, 4.0, "Virgo Cluster"],
+    ];
+    for (const [id, ra, dec, fov, name] of presets) {
+      const btn = document.getElementById(id);
+      btn?.addEventListener("click", () => {
+        void this.skyViewer.gotoRaDecFov(ra, dec, fov);
+        this.skyStatusEl.textContent = `Centred on ${name}.`;
+      });
+    }
+  }
+
+  private wireHubble1929Button(): void {
+    const btn = document.getElementById("hubble1929-btn");
+    btn?.addEventListener("click", () => {
+      const tour = new Hubble1929Tour({
+        skyViewer: this.skyViewer,
+        plotGalaxy: (g) => {
+          this.plotted.set(g.id, g);
+          this.refresh();
+        },
+        clearHubble1929: () => {
+          for (const id of Array.from(this.plotted.keys())) {
+            if (id.startsWith("hubble1929-")) this.plotted.delete(id);
+          }
+          this.refresh();
+        },
+        getAxes: () => this.axes,
+        setAxes: (axes) => {
+          this.axes = axes;
+          this.controls.setAxes(axes);
+          this.diagram.setAxes(axes);
+        },
+        getPlotted: () => Array.from(this.plotted.values()),
+        onClose: () => {
+          this.skyStatusEl.textContent = "Hubble's 1929 tour finished.";
+        },
+      });
+      void tour.start();
+    });
   }
 
   private renderGalaxySets(): void {
+    // Render the per-category galaxy lists using the same class names
+    // as h-r-diagram's STAR_SETS (.star-set / .set-stars / .set-label)
+    // so the two apps can share styles.
     this.galaxySetsContainer.replaceChildren();
     for (const set of GALAXY_SETS) {
       const details = document.createElement("details");
+      details.className = "star-set";
       const summary = document.createElement("summary");
       const swatch = document.createElement("span");
       swatch.className = "set-swatch";
       swatch.style.background = set.markerColor;
-      summary.appendChild(swatch);
-      summary.appendChild(document.createTextNode(` ${set.label} `));
+      const label = document.createElement("span");
+      label.className = "set-label";
+      label.textContent = set.label;
       const count = document.createElement("span");
-      count.className = "hint";
-      count.textContent = `(${set.galaxyIds.length})`;
-      summary.appendChild(count);
+      count.className = "set-count";
+      count.textContent = String(set.galaxyIds.length);
+      summary.append(swatch, label, count);
       details.appendChild(summary);
 
       const desc = document.createElement("p");
-      desc.className = "hint";
-      desc.style.margin = "4px 0";
+      desc.className = "set-description";
       desc.textContent = set.description;
       details.appendChild(desc);
 
+      const setActions = document.createElement("div");
+      setActions.className = "set-actions";
       const addAll = document.createElement("button");
       addAll.type = "button";
       addAll.textContent = "Add all to chart";
-      addAll.style.marginRight = "6px";
       addAll.addEventListener("click", () => {
         for (const id of set.galaxyIds) {
           const g = findGalaxyById(id);
           if (g) this.addCurated(g);
         }
       });
-      details.appendChild(addAll);
-
       const visToggle = document.createElement("label");
-      visToggle.className = "control-pair";
+      visToggle.className = "set-vis";
       const cb = document.createElement("input");
       cb.type = "checkbox";
       cb.checked = true;
@@ -195,10 +277,11 @@ class App {
         this.skyViewer.setSetVisibility(set.id, cb.checked);
       });
       visToggle.append(cb, document.createTextNode(" Show on sky"));
-      details.appendChild(visToggle);
+      setActions.append(addAll, visToggle);
+      details.appendChild(setActions);
 
       const list = document.createElement("ul");
-      list.className = "galaxy-list";
+      list.className = "set-stars";
       for (const id of set.galaxyIds) {
         const g = findGalaxyById(id);
         if (!g) continue;
@@ -313,23 +396,29 @@ class App {
     this.inflightSearch?.abort();
     const ctrl = new AbortController();
     this.inflightSearch = ctrl;
-    this.skyStatusEl.textContent = `Searching SDSS (radius ${radius.toFixed(2)}°, top ${limit})…`;
+    this.skyStatusEl.textContent = `Searching for galaxies (radius ${radius.toFixed(2)}°, top ${limit})…`;
     try {
-      const rows = await searchSdssGalaxies(ra, dec, radius, {
+      const result = await searchGalaxies(ra, dec, radius, {
         topN: limit,
         signal: ctrl.signal,
       });
       if (ctrl.signal.aborted) return;
-      const candidates = rows
-        .map((r: SdssGalaxyRow) => sdssRowToGalaxy(r))
+      const candidates = result.galaxies
+        .map((row) => searchedGalaxyToGalaxy(row))
         .filter((g) => !this.plotted.has(g.id));
       this.searchResults.clear();
       for (const g of candidates) this.searchResults.set(g.id, g);
       await this.skyViewer.setCandidates(candidates);
+      const sourceLabel =
+        result.sourceUsed === "sdss"
+          ? "from the Sloan Digital Sky Survey"
+          : result.sourceUsed === "2mrs"
+            ? "from the 2MASS Redshift Survey"
+            : "";
       this.skyStatusEl.textContent =
         candidates.length > 0
-          ? `Found ${candidates.length} SDSS galaxies. Click a marker to add one, or "Add all".`
-          : "No SDSS galaxies in that region. Try the SDSS sky survey or pan to a different patch.";
+          ? `Found ${candidates.length} galaxies ${sourceLabel}. Click a marker to add one, or "Add all".`
+          : "No galaxies found in that region. Try panning to a different patch — coverage is best in the northern hemisphere away from the Milky Way.";
     } catch (e) {
       if (ctrl.signal.aborted) return;
       const msg =

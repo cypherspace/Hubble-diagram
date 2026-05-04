@@ -1,4 +1,5 @@
 import type { Galaxy, PlottedGalaxy } from "../types";
+import { buildThumbnail } from "./galaxyThumbnail";
 
 export interface DataPanelCallbacks {
   onAddToChart?: (galaxy: Galaxy) => void;
@@ -23,18 +24,26 @@ export class DataPanel {
   show(galaxy: Galaxy, plotted: PlottedGalaxy | null): void {
     const wrap = document.createElement("div");
 
+    // Header: thumbnail on the left, name + alt names on the right.
+    const header = document.createElement("div");
+    header.className = "data-panel-header";
+    const thumb = buildThumbnail(galaxy, 110);
+    header.appendChild(thumb);
+
+    const headerText = document.createElement("div");
+    headerText.className = "data-panel-header-text";
     const heading = document.createElement("div");
-    heading.style.fontSize = "16px";
-    heading.style.fontWeight = "600";
+    heading.className = "galaxy-title";
     heading.textContent = galaxy.name;
+    headerText.appendChild(heading);
     if (galaxy.altNames.length) {
-      const sub = document.createElement("span");
+      const sub = document.createElement("div");
       sub.className = "hint";
-      sub.style.marginLeft = "8px";
       sub.textContent = galaxy.altNames.join(", ");
-      heading.appendChild(sub);
+      headerText.appendChild(sub);
     }
-    wrap.appendChild(heading);
+    header.appendChild(headerText);
+    wrap.appendChild(header);
 
     // Capability badges
     const badges = document.createElement("div");
@@ -63,17 +72,24 @@ export class DataPanel {
     claim.textContent = galaxy.claimToFame;
     wrap.appendChild(claim);
 
-    // Numbers
-    const numbers = document.createElement("div");
-    numbers.style.fontSize = "13px";
-    numbers.style.lineHeight = "1.6";
-    numbers.innerHTML = `
-      <div>Type: <strong>${galaxy.type}</strong></div>
-      <div>Distance: <strong>${galaxy.distanceMpc.toFixed(2)} Mpc</strong> ± ${galaxy.distanceMpcErr.toFixed(2)}</div>
-      <div>Redshift z: <strong>${galaxy.z.toExponential(3)}</strong></div>
-      <div>Recession velocity: <strong>${galaxy.vRecKmS} km/s</strong></div>
-    `;
-    wrap.appendChild(numbers);
+    // Highlighted headline numbers, in the same visual treatment that
+    // h-r-diagram uses for temperature / luminosity / distance.
+    wrap.appendChild(
+      headlineStat(
+        "Distance",
+        `${galaxy.distanceMpc.toFixed(2)} Mpc ± ${galaxy.distanceMpcErr.toFixed(2)}`,
+      ),
+    );
+    wrap.appendChild(headlineStat("Redshift z", galaxy.z.toExponential(3)));
+    wrap.appendChild(
+      headlineStat("Recession velocity", `${galaxy.vRecKmS} km/s`),
+    );
+
+    // Galaxy type — secondary, smaller.
+    const typeRow = document.createElement("div");
+    typeRow.className = "secondary-row";
+    typeRow.innerHTML = `Type: <strong>${galaxy.type}</strong>`;
+    wrap.appendChild(typeRow);
 
     if (plotted) {
       const stamp = document.createElement("div");
@@ -168,4 +184,19 @@ function badge(
   s.title = title;
   s.textContent = text + (on ? "" : " (n/a)");
   return s;
+}
+
+// Highlighted headline statistic — same visual treatment as
+// h-r-diagram's "Temperature" / "Brightness" cards.
+function headlineStat(label: string, value: string): HTMLElement {
+  const wrap = document.createElement("div");
+  wrap.className = "headline-stat";
+  const lab = document.createElement("div");
+  lab.className = "headline-label";
+  lab.textContent = label;
+  const val = document.createElement("div");
+  val.className = "headline-value";
+  val.textContent = value;
+  wrap.append(lab, val);
+  return wrap;
 }

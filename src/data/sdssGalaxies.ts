@@ -94,11 +94,11 @@ export function sdssRowToGalaxy(row: SdssGalaxyRow): Galaxy {
       cepheidPL: false,
       lightCurves: false,
       // SDSS galaxies all have spectra — that's how their redshift was
-      // measured — but we can't pre-fetch them at build time for
-      // arbitrary search results. The runtime spectrum panel could
-      // still work if the dr17.sdss.org CSV endpoint ever proves
-      // CORS-friendly; for now leave the badge off.
-      sdssSpectrum: false,
+      // measured. Item 8 wires up a runtime resolver
+      // (lookupSdssSpec → fetchSdssSpectrumCsv) so the SpectrumPanel
+      // can fetch the spec-lite CSV on demand. Both SkyServer and
+      // dr17.sdss.org serve permissive CORS headers.
+      sdssSpectrum: true,
     },
     claimToFame: `An SDSS-catalogued galaxy at redshift z = ${row.z.toFixed(4)}, r-band magnitude ${row.rmag.toFixed(2)}.`,
   };
