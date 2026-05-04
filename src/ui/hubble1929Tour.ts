@@ -307,22 +307,19 @@ export class Hubble1929Tour {
   }
 
   private showOriginalGraphPanel(): Promise<boolean> {
-    // Inline reproduction of Hubble's 1929 Figure 1, drawn from the
-    // same numbers we just plotted. Built as an SVG so it scales
-    // cleanly and doesn't depend on an external image.
-    const figureSvg = renderHubble1929Figure();
+    // Use the actual scanned figure from Hubble's 1929 PNAS paper
+    // (Figure 1), shipped as public/data/hubble1929-original.jpeg.
     const html = `
       <p>That's it! We now have a graph between speed and distance.
-        Here's a reproduction of Hubble's <em>original</em> 1929
-        graph, plotted from the same 24 galaxies you just stepped
-        through:</p>
-      <figure style="margin: 12px 0; text-align: center; background: #f4ecd8; padding: 12px; border-radius: 4px">
-        ${figureSvg}
-        <figcaption style="color: #333; margin-top: 6px; font-size: 0.85rem; font-style: italic">
-          Reproduced from the data in Hubble (1929),
+        Here's Hubble's <em>original</em> 1929 graph:</p>
+      <figure style="margin: 12px 0; text-align: center">
+        <img src="./data/hubble1929-original.jpeg"
+             alt="Figure 1 from Hubble (1929): radial velocity plotted against distance for 24 extra-galactic nebulae"
+             style="max-width: 100%; height: auto; background: #fff; padding: 6px; border-radius: 4px" />
+        <figcaption style="color: var(--muted); margin-top: 6px; font-size: 0.85rem; font-style: italic">
+          Figure 1 from Hubble (1929),
           <a href="https://www.pnas.org/doi/10.1073/pnas.15.3.168"
-            target="_blank" rel="noopener">PNAS 15, 168</a>.
-          Filled circles: individual galaxies. Solid line: best fit.
+             target="_blank" rel="noopener">PNAS 15, 168</a>.
         </figcaption>
       </figure>
       <p>You can see that it shows a proportional relationship between
@@ -502,78 +499,3 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/** Render Hubble's 1929 figure inline as an SVG, using the actual
- *  Hubble (1929) values from our data file. Cream background +
- *  black axes + filled circles for the points + a least-squares
- *  fit line. Matches the look of the original figure 1. */
-function renderHubble1929Figure(): string {
-  // Plot domain: 0 to 2 Mpc on x, -200 to 1200 km/s on y. Hubble's
-  // own paper used the range "0 to 2 × 10⁶ parsecs" on x and
-  // "-200 to +1200 km" on y.
-  const W = 560;
-  const H = 320;
-  const m = { top: 22, right: 22, bottom: 50, left: 70 };
-  const innerW = W - m.left - m.right;
-  const innerH = H - m.top - m.bottom;
-  const xMin = 0, xMax = 2;
-  const yMin = -200, yMax = 1200;
-  const xS = (x: number): number => m.left + ((x - xMin) / (xMax - xMin)) * innerW;
-  const yS = (y: number): number => m.top + (1 - (y - yMin) / (yMax - yMin)) * innerH;
-
-  // Least-squares fit through the origin (matches Hubble's reported
-  // slope of ~500 km/s/Mpc).
-  let sumDD = 0, sumDV = 0;
-  for (const g of HUBBLE_1929) {
-    sumDD += g.hubbleDistanceMpc * g.hubbleDistanceMpc;
-    sumDV += g.hubbleDistanceMpc * g.hubbleVelocityKmS;
-  }
-  const slope = sumDD > 0 ? sumDV / sumDD : 500;
-  const lineYAtMax = slope * xMax;
-
-  // Tick positions.
-  const xTicks = [0, 0.5, 1, 1.5, 2];
-  const yTicks = [0, 500, 1000];
-  const xTickEls = xTicks
-    .map((tx) => {
-      const px = xS(tx);
-      return `<line x1="${px}" y1="${m.top}" x2="${px}" y2="${m.top + innerH}" stroke="#888" stroke-width="0.5" stroke-dasharray="2,3" />
-      <text x="${px}" y="${m.top + innerH + 16}" text-anchor="middle" font-size="11" fill="#222">${tx === 0 ? "0" : tx === 1 ? "10⁶ PARSECS" : tx === 2 ? "2×10⁶ PARSECS" : ""}</text>`;
-    })
-    .join("");
-  const yTickEls = yTicks
-    .map((ty) => {
-      const py = yS(ty);
-      return `<line x1="${m.left}" y1="${py}" x2="${m.left + innerW}" y2="${py}" stroke="#888" stroke-width="0.5" stroke-dasharray="2,3" />
-      <text x="${m.left - 6}" y="${py + 4}" text-anchor="end" font-size="11" fill="#222">${ty === 0 ? "0" : ty === 500 ? "500 KM" : "+1000 KM"}</text>`;
-    })
-    .join("");
-
-  // Points.
-  const pointEls = HUBBLE_1929
-    .map((g) => {
-      const px = xS(Math.max(xMin, Math.min(xMax, g.hubbleDistanceMpc)));
-      const py = yS(Math.max(yMin, Math.min(yMax, g.hubbleVelocityKmS)));
-      return `<circle cx="${px}" cy="${py}" r="4" fill="#1a1a1a" />`;
-    })
-    .join("");
-
-  // Best-fit line through the origin.
-  const lineEl = `<line x1="${xS(0)}" y1="${yS(0)}" x2="${xS(xMax)}" y2="${yS(lineYAtMax)}" stroke="#1a1a1a" stroke-width="1.4" />`;
-
-  // Axis labels.
-  const xLabel = `<text x="${m.left + innerW / 2}" y="${H - 6}" text-anchor="middle" font-size="12" fill="#222" font-weight="600">DISTANCE</text>`;
-  const yLabel = `<text x="${m.left - 50}" y="${m.top + innerH / 2}" transform="rotate(-90 ${m.left - 50} ${m.top + innerH / 2})" text-anchor="middle" font-size="12" fill="#222" font-weight="600">VELOCITY</text>`;
-
-  // Plot frame.
-  const frame = `<rect x="${m.left}" y="${m.top}" width="${innerW}" height="${innerH}" fill="none" stroke="#1a1a1a" stroke-width="1" />`;
-
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:560px;display:block;margin:0 auto" xmlns="http://www.w3.org/2000/svg">
-    ${xTickEls}
-    ${yTickEls}
-    ${frame}
-    ${lineEl}
-    ${pointEls}
-    ${xLabel}
-    ${yLabel}
-  </svg>`;
-}
