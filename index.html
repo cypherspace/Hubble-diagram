@@ -56,7 +56,20 @@
                 <option value="P/PanSTARRS/DR1/color-z-zg-g">PanSTARRS</option>
                 <option value="P/SDSS9/color">SDSS</option>
                 <option value="P/2MASS/color">2MASS (infrared)</option>
+                <option value="P/HST/EPO">HST press-release imagery</option>
+                <option value="P/HST/PR2014-13/HUDF">Hubble Ultra Deep Field</option>
               </select>
+              <label class="control-pair" title="Layer Hubble Space Telescope imagery on top of the base survey, where it's available">
+                <input type="checkbox" id="opt-hst-overlay" />
+                HST overlay
+              </label>
+            </div>
+            <div class="control-group">
+              <span class="control-group-heading">Jump to</span>
+              <button id="goto-hdfn-btn" title="Go to the Hubble Deep Field North">HDF-N</button>
+              <button id="goto-hudf-btn" title="Go to the Hubble Ultra Deep Field">HUDF</button>
+              <button id="goto-coma-btn" title="Go to the Coma Cluster (rich SDSS region)">Coma</button>
+              <button id="goto-virgo-btn" title="Go to the Virgo Cluster">Virgo</button>
             </div>
             <div class="control-group">
               <span class="control-group-heading">Search</span>

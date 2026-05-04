@@ -152,6 +152,31 @@ class App {
     showMapInfo.addEventListener("change", () => {
       document.body.classList.toggle("view-info-open", showMapInfo.checked);
     });
+
+    // HST overlay checkbox.
+    const hstOverlay = document.getElementById(
+      "opt-hst-overlay",
+    ) as HTMLInputElement | null;
+    hstOverlay?.addEventListener("change", () => {
+      void this.skyViewer.setHstOverlayVisible(hstOverlay.checked);
+    });
+
+    // "Jump to" preset buttons. FOV values chosen so the deep fields
+    // fill roughly half the panel; cluster jumps are zoomed out
+    // enough to see member galaxies.
+    const presets: Array<[string, number, number, number, string]> = [
+      ["goto-hdfn-btn", 189.21, 62.22, 0.1, "Hubble Deep Field North"],
+      ["goto-hudf-btn", 53.16, -27.79, 0.1, "Hubble Ultra Deep Field"],
+      ["goto-coma-btn", 194.94, 27.94, 1.5, "Coma Cluster"],
+      ["goto-virgo-btn", 187.7, 12.39, 4.0, "Virgo Cluster"],
+    ];
+    for (const [id, ra, dec, fov, name] of presets) {
+      const btn = document.getElementById(id);
+      btn?.addEventListener("click", () => {
+        void this.skyViewer.gotoRaDecFov(ra, dec, fov);
+        this.skyStatusEl.textContent = `Centred on ${name}.`;
+      });
+    }
   }
 
   private renderGalaxySets(): void {
