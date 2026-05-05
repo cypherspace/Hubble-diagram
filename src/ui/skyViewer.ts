@@ -127,7 +127,12 @@ export class SkyViewer {
       fov: this.opts.initialFov ?? 5,
       target: this.opts.initialTarget ?? "Andromeda",
       cooFrame: "ICRSd",
-      showReticle: true,
+      // Reticle off — every galaxy click recentres the sky now, so a
+      // visible central crosshair would land directly on top of the
+      // clicked galaxy and read as "a green cross at the last place I
+      // clicked." The Aladin built-in zoom controls and the user's
+      // mouse position are sufficient to convey "where am I looking."
+      showReticle: false,
       showZoomControl: true,
       showFullscreenControl: true,
       showLayersControl: false,
