@@ -642,7 +642,7 @@ h2 {
 }
 .hb-modal {
   background: var(--panel);
-  border: 1px solid var(--line);
+  border: 1px solid var(--accent);
   border-radius: 8px;
   padding: 20px;
   width: min(900px, 96vw);
@@ -651,7 +651,8 @@ h2 {
 }
 .hb-modal h3 {
   margin: 0 0 8px;
-  font-size: 16px;
+  font-size: 18px;
+  color: var(--accent);
 }
 .hb-modal .modal-close {
   float: right;
@@ -676,8 +677,9 @@ h2 {
 .hb-modal .formula {
   font-family: "SFMono-Regular", Consolas, monospace;
   background: var(--bg);
-  padding: 8px;
+  padding: 8px 10px;
   border-radius: 4px;
+  border-left: 3px solid var(--accent);
   margin: 6px 0;
 }
 .hb-modal .answer {
