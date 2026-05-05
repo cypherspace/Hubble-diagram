@@ -85,8 +85,9 @@ export interface SearchResult {
 }
 
 /** Try Cosmicflows-3 first; fire CF4 in the background; if CF3 returns
- *  fewer than FALLBACK_THRESHOLD rows, fall through to SDSS, then 2MRS,
- *  merging on sky-position. */
+ *  fewer than FALLBACK_THRESHOLD rows (or fails), fall through to SDSS,
+ *  then 2MRS, merging on sky-position. CF3/CF4 failures are silent
+ *  because they're optional: SDSS+2MRS still produce a usable result. */
 export async function searchGalaxies(
   raDeg: number,
   decDeg: number,
@@ -94,23 +95,26 @@ export async function searchGalaxies(
   options: SearchOptions = {},
 ): Promise<SearchResult> {
   const sourcesUsed: SearchResult["sourcesUsed"] = [];
-  // Fire CF3 + CF4 in parallel. CF4 is intentionally allowed to run on
-  // independent of the foreground await chain — its result lands later.
-  const cf3Promise = searchCosmicflows3(raDeg, decDeg, radiusDeg, options);
+  // Fire CF3 + CF4 in parallel. Both swallow errors — VizieR sometimes
+  // refuses these tables (column-name drift between catalog releases),
+  // and we'd rather show SDSS results than fail the whole search.
+  const cf3Promise = searchCosmicflows3(raDeg, decDeg, radiusDeg, options).catch(
+    () => [] as SearchedGalaxy[],
+  );
   const cf4Promise = searchCosmicflows4(raDeg, decDeg, radiusDeg, options).catch(
     () => [] as SearchedGalaxy[],
   );
 
   let merged: SearchedGalaxy[] = await cf3Promise;
-  sourcesUsed.push("cf3");
+  if (merged.length > 0) sourcesUsed.push("cf3");
 
   if (merged.length < FALLBACK_THRESHOLD) {
     try {
       const sdss = await searchSdss(raDeg, decDeg, radiusDeg, options);
       merged = mergeByPosition(merged, sdss);
-      sourcesUsed.push("sdss");
+      if (sdss.length > 0) sourcesUsed.push("sdss");
     } catch {
-      // SDSS failures are non-fatal; the user still sees CF3 + 2MRS.
+      // SDSS failures are non-fatal; the user still sees 2MRS.
     }
   }
 
@@ -118,7 +122,7 @@ export async function searchGalaxies(
     try {
       const two = await search2mrs(raDeg, decDeg, radiusDeg, options);
       merged = mergeByPosition(merged, two);
-      sourcesUsed.push("2mrs");
+      if (two.length > 0) sourcesUsed.push("2mrs");
     } catch {
       // 2MRS failures are non-fatal.
     }
@@ -148,6 +152,13 @@ export function cf3MethodLabel(code: string | undefined): string {
   return CF3_METHOD_LABELS[trimmed[0]] ?? "Redshift-independent (Cosmicflows-3)";
 }
 
+// Cosmicflows tables publish the distance modulus (`DM` or `Mod`)
+// rather than a raw distance column, so we compute Mpc from the modulus
+// using the standard formula: d_Mpc = 10^((DM - 25) / 5).
+function distanceMpcFromModulus(mod: number): number {
+  return Math.pow(10, (mod - 25) / 5);
+}
+
 async function searchCosmicflows3(
   raDeg: number,
   decDeg: number,
@@ -155,22 +166,26 @@ async function searchCosmicflows3(
   options: SearchOptions,
 ): Promise<SearchedGalaxy[]> {
   const topN = options.topN ?? 50;
+  // Cosmicflows-3 (Tully+ 2016, J/AJ/152/50). The combined catalog has
+  // a per-galaxy distance modulus (`DM`) and CMB-frame velocity (`Vcmb`).
   const adql = `SELECT TOP ${topN}
-  "Name", "RAJ2000", "DEJ2000", "Dist", "Vcmb", "Mthd"
+  "Name", "RAJ2000", "DEJ2000", "DM", "Vcmb"
 FROM "J/AJ/152/50/table3"
 WHERE 1 = CONTAINS(POINT('ICRS', "RAJ2000", "DEJ2000"), CIRCLE('ICRS', ${raDeg}, ${decDeg}, ${radiusDeg}))
-  AND "Dist" IS NOT NULL AND "Dist" > 0
+  AND "DM" IS NOT NULL
   AND "Vcmb" IS NOT NULL
-ORDER BY "Dist" ASC`;
+ORDER BY "DM" ASC`;
   const csv = await runAdql(adql, options.signal);
   const rows = parseCsv(csv);
   const out: SearchedGalaxy[] = [];
   for (const r of rows) {
     const ra = num(r["RAJ2000"]);
     const dec = num(r["DEJ2000"]);
-    const dist = num(r["Dist"]);
+    const dm = num(r["DM"]);
     const vcmb = num(r["Vcmb"]);
-    if (ra == null || dec == null || dist == null || vcmb == null) continue;
+    if (ra == null || dec == null || dm == null || vcmb == null) continue;
+    const dist = distanceMpcFromModulus(dm);
+    if (!Number.isFinite(dist) || dist <= 0) continue;
     const name = (r["Name"] ?? "").trim();
     out.push({
       source: "cf3",
@@ -195,25 +210,26 @@ async function searchCosmicflows4(
   options: SearchOptions,
 ): Promise<SearchedGalaxy[]> {
   const topN = options.topN ?? 50;
-  // Cosmicflows-4 publishes a similar schema. The headline distance
-  // column on table2 is `Dist` (Mpc), with `Vcmb` for CMB-frame
-  // velocity. CF4 doesn't tag a per-row method; report it generically.
+  // Cosmicflows-4 (Tully+ 2023, J/ApJ/944/94). Same modulus-based
+  // schema as CF3.
   const adql = `SELECT TOP ${topN}
-  "Name", "RAJ2000", "DEJ2000", "Dist", "Vcmb"
+  "Name", "RAJ2000", "DEJ2000", "DM", "Vcmb"
 FROM "J/ApJ/944/94/table2"
 WHERE 1 = CONTAINS(POINT('ICRS', "RAJ2000", "DEJ2000"), CIRCLE('ICRS', ${raDeg}, ${decDeg}, ${radiusDeg}))
-  AND "Dist" IS NOT NULL AND "Dist" > 0
+  AND "DM" IS NOT NULL
   AND "Vcmb" IS NOT NULL
-ORDER BY "Dist" ASC`;
+ORDER BY "DM" ASC`;
   const csv = await runAdql(adql, options.signal);
   const rows = parseCsv(csv);
   const out: SearchedGalaxy[] = [];
   for (const r of rows) {
     const ra = num(r["RAJ2000"]);
     const dec = num(r["DEJ2000"]);
-    const dist = num(r["Dist"]);
+    const dm = num(r["DM"]);
     const vcmb = num(r["Vcmb"]);
-    if (ra == null || dec == null || dist == null || vcmb == null) continue;
+    if (ra == null || dec == null || dm == null || vcmb == null) continue;
+    const dist = distanceMpcFromModulus(dm);
+    if (!Number.isFinite(dist) || dist <= 0) continue;
     const name = (r["Name"] ?? "").trim();
     out.push({
       source: "cf4",
