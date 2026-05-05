@@ -8,13 +8,21 @@ const SEEN_KEY = "hubble-diagram.tour.v1";
 
 interface Step {
   // CSS selector for the element to highlight. The tooltip renders
-  // next to it using getBoundingClientRect.
-  selector: string;
+  // next to it using getBoundingClientRect. If omitted, the tooltip is
+  // centered on screen with no spotlight (used for intro/outro steps).
+  selector?: string;
   title: string;
   body: string;
 }
 
 const STEPS: Step[] = [
+  {
+    title: "Welcome!",
+    body:
+      "This tool helps you explore galaxies and how they fit on " +
+      "Hubble's famous diagram comparing recession velocity (how fast " +
+      "they are moving away from us) and distance (how far away they are).",
+  },
   {
     selector: "#aladin-lite-div",
     title: "The night sky",
@@ -55,14 +63,6 @@ const STEPS: Step[] = [
       "relationship happen. Once you've added enough galaxies, you " +
       "can click the \"Diagram Guide\" to get a better explanation of " +
       "what you're seeing.",
-  },
-  {
-    selector: "#how-btn",
-    title: "Help is always here",
-    body:
-      "Read 'How it works' for the process that you should follow, " +
-      "or 'How we know' for the physics behind every number. You can " +
-      "replay this tour any time with the '? Tour' button.",
   },
 ];
 
@@ -107,13 +107,14 @@ export class Walkthrough {
       return;
     }
     const step = STEPS[this.idx];
-    const target = document.querySelector(step.selector) as HTMLElement | null;
-    if (!target) {
+    const target = step.selector
+      ? (document.querySelector(step.selector) as HTMLElement | null)
+      : null;
+    if (step.selector && !target) {
       this.idx++;
       this.renderStep();
       return;
     }
-    const rect = target.getBoundingClientRect();
 
     const overlay = document.createElement("div");
     overlay.style.position = "fixed";
@@ -122,38 +123,48 @@ export class Walkthrough {
     overlay.style.zIndex = "2000";
     overlay.style.pointerEvents = "auto";
 
-    // Spotlight on the target element.
-    const spotlight = document.createElement("div");
-    spotlight.style.position = "fixed";
-    spotlight.style.left = `${rect.left - 6}px`;
-    spotlight.style.top = `${rect.top - 6}px`;
-    spotlight.style.width = `${rect.width + 12}px`;
-    spotlight.style.height = `${rect.height + 12}px`;
-    spotlight.style.border = "2px solid #6cc4ff";
-    spotlight.style.borderRadius = "6px";
-    spotlight.style.boxShadow = "0 0 0 9999px rgba(11, 16, 32, 0.55)";
-    spotlight.style.pointerEvents = "none";
-    overlay.appendChild(spotlight);
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      const spotlight = document.createElement("div");
+      spotlight.style.position = "fixed";
+      spotlight.style.left = `${rect.left - 6}px`;
+      spotlight.style.top = `${rect.top - 6}px`;
+      spotlight.style.width = `${rect.width + 12}px`;
+      spotlight.style.height = `${rect.height + 12}px`;
+      spotlight.style.border = "2px solid var(--accent)";
+      spotlight.style.borderRadius = "6px";
+      spotlight.style.boxShadow = "0 0 0 9999px rgba(11, 16, 32, 0.55)";
+      spotlight.style.pointerEvents = "none";
+      overlay.appendChild(spotlight);
+    }
 
     // Tooltip — placed below the target if there's room, otherwise above.
+    // For untargeted (intro) steps, center it on screen.
     const tooltip = document.createElement("div");
     tooltip.style.position = "fixed";
     tooltip.style.maxWidth = "360px";
     tooltip.style.background = "var(--panel)";
-    tooltip.style.border = "1px solid var(--line)";
+    tooltip.style.border = "1px solid var(--accent)";
     tooltip.style.borderRadius = "6px";
     tooltip.style.padding = "12px";
     tooltip.style.color = "var(--text)";
     tooltip.style.fontSize = "13px";
     tooltip.style.boxShadow = "0 4px 16px rgba(0, 0, 0, 0.4)";
-    const fitsBelow = rect.bottom + 200 < window.innerHeight;
-    if (fitsBelow) {
-      tooltip.style.top = `${rect.bottom + 12}px`;
+    if (target) {
+      const rect = target.getBoundingClientRect();
+      const fitsBelow = rect.bottom + 200 < window.innerHeight;
+      if (fitsBelow) {
+        tooltip.style.top = `${rect.bottom + 12}px`;
+      } else {
+        tooltip.style.bottom = `${window.innerHeight - rect.top + 12}px`;
+      }
+      const left = Math.min(rect.left, window.innerWidth - 380);
+      tooltip.style.left = `${Math.max(12, left)}px`;
     } else {
-      tooltip.style.bottom = `${window.innerHeight - rect.top + 12}px`;
+      tooltip.style.top = "50%";
+      tooltip.style.left = "50%";
+      tooltip.style.transform = "translate(-50%, -50%)";
     }
-    const left = Math.min(rect.left, window.innerWidth - 380);
-    tooltip.style.left = `${Math.max(12, left)}px`;
     tooltip.innerHTML = `
       <div style="font-weight:600;font-size:14px;margin-bottom:6px">${step.title}</div>
       <div style="line-height:1.5">${step.body}</div>
