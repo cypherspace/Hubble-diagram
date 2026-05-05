@@ -197,6 +197,10 @@ section, aside {
    pushed below the fold. */
 aside { overflow: hidden; }
 
+/* Sky panel is the positioning anchor for #sky-status, which floats
+   over the bottom-right of the sky map as a non-interactive toast. */
+#sky-panel { position: relative; }
+
 /* Sky-panel controls — single flowing flex row that wraps as needed.
    Mirrors h-r-diagram exactly so the two apps feel identical. */
 #sky-controls {
@@ -206,9 +210,6 @@ aside { overflow: hidden; }
   align-items: center;
   margin-bottom: 0.5rem;
   font-size: 0.85rem;
-  /* Reserve a sensible minimum so the sky map doesn't reflow as the
-     status text grows or shrinks during search / add operations. */
-  min-height: 7rem;
 }
 #sky-controls input,
 #sky-controls select,
@@ -238,9 +239,20 @@ aside { overflow: hidden; }
 #sky-controls input[type="text"] { width: 9rem; }
 #sky-controls input[type="checkbox"] { margin-right: 0.25rem; }
 #sky-status {
-  margin-left: auto;
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 10;
+  max-width: min(70%, 420px);
+  padding: 4px 8px;
+  background: rgba(11, 16, 32, 0.7);
+  border: 1px solid var(--grid);
+  border-radius: 4px;
   color: var(--muted);
+  font-size: 0.78rem;
+  pointer-events: none;
 }
+#sky-status:empty { display: none; }
 
 /* Inline (?) help affordance — small text-only button that opens a
    tooltip / modal explainer. Distinct from the bordered action
