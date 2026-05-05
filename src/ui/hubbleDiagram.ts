@@ -5,6 +5,7 @@ import {
   H0_PUBLISHED_KM_S_MPC,
   fitHubbleSlope,
 } from "../data/derive";
+import { setColorForGalaxyId } from "../data/galaxies";
 import { openModal } from "./modal";
 
 // D3 scatter plot of distance (Mpc) vs recession velocity (km/s) or
@@ -467,11 +468,23 @@ export class HubbleDiagram {
       .data(data, (d) => d.id)
       .enter()
       .append("circle")
-      .attr("class", (d) =>
-        `galaxy tag-${d.distanceTag}${d.isAnomaly ? " anomaly" : ""}${
-          d.id === this.selectedId ? " selected" : ""
-        }`,
-      )
+      .attr("class", (d) => {
+        // Curated galaxies (in any GALAXY_SET) inherit their set's
+        // marker colour with a yellow border, so they stay visually
+        // distinct from green/cyan search-found dots. Non-curated
+        // galaxies (search results, hubble1929 entries) use the
+        // tag-based green/cyan fill.
+        const curated = setColorForGalaxyId(d.id) != null;
+        const baseClass = curated ? "curated" : `tag-${d.distanceTag}`;
+        // For curated galaxies the set colour already conveys
+        // category, so we don't double up with the anomaly fill —
+        // anomalies in curated sets show via the data panel and the
+        // `anomalies` set's red colour.
+        const anomalyClass = d.isAnomaly && !curated ? " anomaly" : "";
+        const selectedClass = d.id === this.selectedId ? " selected" : "";
+        return `galaxy ${baseClass}${anomalyClass}${selectedClass}`;
+      })
+      .style("fill", (d) => setColorForGalaxyId(d.id))
       .attr("cx", (d) => xScale(d.plottedDistanceMpc))
       .attr("cy", (d) => yScale(this.yValue(d)))
       .attr("r", (d) => (d.id === this.selectedId ? 7 : 5))

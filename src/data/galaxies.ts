@@ -845,3 +845,17 @@ export const GALAXY_SETS: GalaxySet[] = [
     galaxyIds: ["ngc7320", "3c273", "mrk421"],
   },
 ];
+
+/**
+ * Marker colour of the first GALAXY_SET that contains this galaxy id,
+ * or null for ids not in any curated set (search results, hubble1929
+ * tour entries, etc.). Used by the Hubble diagram to colour curated
+ * dots by their set so they remain visually distinct from green/cyan
+ * search-found dots.
+ */
+export function setColorForGalaxyId(id: string): string | null {
+  for (const set of GALAXY_SETS) {
+    if (set.galaxyIds.includes(id)) return set.markerColor;
+  }
+  return null;
+}

@@ -330,7 +330,20 @@ class App {
   }
 
   private resolveGalaxy(id: string): Galaxy | undefined {
-    return findGalaxyById(id) ?? this.searchResults.get(id);
+    // Three lookup paths in priority order:
+    //  1. CURATED_GALAXIES — the static seed list.
+    //  2. searchResults — the most recent VizieR query, in-memory only.
+    //     Cleared by Search-again or "Clear results", so this misses
+    //     anything the user previously plotted from a search.
+    //  3. plotted — covers the gap above. Once a galaxy has been added
+    //     to the chart, its data lives here permanently, so clicking
+    //     its dot on the diagram still resolves even after the search
+    //     results that birthed it are gone.
+    return (
+      findGalaxyById(id) ??
+      this.searchResults.get(id) ??
+      this.plotted.get(id)
+    );
   }
 
   private select(id: string): void {

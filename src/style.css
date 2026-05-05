@@ -395,10 +395,16 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .hubble-svg circle.galaxy { stroke: transparent; stroke-width: 2; }
 .hubble-svg circle.galaxy.tag-direct       { fill: var(--accent-good); }
 .hubble-svg circle.galaxy.tag-extrapolated { fill: var(--accent-2); }
-/* Anomaly takes precedence over the tag colour — these galaxies are
-   pedagogically interesting precisely because they don't follow the
-   line, so we want the warning colour to dominate. */
+/* Anomaly takes precedence over the tag colour for non-curated
+   galaxies (hubble1929 entries etc.) — these are pedagogically
+   interesting precisely because they don't follow the line, so we
+   want the warning colour to dominate. Curated anomalies live in the
+   `anomalies` set which already paints them red. */
 .hubble-svg circle.galaxy.anomaly { fill: var(--warn); }
+/* Curated galaxies fill comes from inline style="fill: <set color>"
+   set on the circle in JS; the yellow stroke here distinguishes them
+   from search-found green/cyan dots. */
+.hubble-svg circle.galaxy.curated { stroke: var(--accent); }
 .hubble-svg circle.galaxy.selected { stroke: #ffffff; }
 
 /* --- Diagram legend (Direct / Extrapolated / what's this?) --- */
@@ -567,7 +573,11 @@ h2 {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  /* Yellow border matches the curated-circle stroke on the Hubble
+     diagram, so a curated galaxy is visually consistent across the
+     set panel, the diagram, and (transitively) the user's mental
+     model — green/cyan = search-found, yellow-bordered = curated. */
+  border: 2px solid var(--accent);
 }
 .set-label { flex: 1; color: var(--fg); }
 .set-count {
