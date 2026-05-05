@@ -90,6 +90,8 @@ export function sdssRowToGalaxy(row: SdssGalaxyRow): Galaxy {
     distanceMpcErr: +(row.distanceMpc * 0.05).toFixed(2),
     z: +row.z.toFixed(6),
     vRecKmS: v,
+    distanceTag: "extrapolated",
+    distanceMethodLabel: "Redshift × cosmological model (SDSS spectroscopic)",
     capabilities: {
       cepheidPL: false,
       lightCurves: false,

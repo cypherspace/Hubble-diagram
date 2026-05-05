@@ -5,6 +5,7 @@ import {
   H0_PUBLISHED_KM_S_MPC,
   fitHubbleSlope,
 } from "../data/derive";
+import { openModal } from "./modal";
 
 // D3 scatter plot of distance (Mpc) vs recession velocity (km/s) or
 // redshift z. Linear axes only — Hubble's law is a straight line, and
@@ -39,6 +40,7 @@ export class HubbleDiagram {
   private selectedId: string | null = null;
   private axes: AxisConfig;
   private h0Readout: HTMLElement;
+  private legend: HTMLElement;
   private chartHost: HTMLElement;
   private svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private root!: d3.Selection<SVGGElement, unknown, null, undefined>;
@@ -66,6 +68,11 @@ export class HubbleDiagram {
     this.h0Readout.className = "h0-readout";
     this.h0Readout.innerHTML = `<span class="hint">Add galaxies to see your measured Hubble constant.</span>`;
     opts.container.appendChild(this.h0Readout);
+
+    this.legend = document.createElement("div");
+    this.legend.className = "diagram-legend";
+    opts.container.appendChild(this.legend);
+    this.renderLegend();
 
     this.chartHost = document.createElement("div");
     this.chartHost.className = "hubble-chart-host";
@@ -391,9 +398,15 @@ export class HubbleDiagram {
       .attr("class", "fit-lines")
       .attr("clip-path", `url(#${clipId})`);
 
-    if (data.length >= 2) {
+    // Best-fit slope is computed from "direct" distances only —
+    // redshift-derived points sit on a Hubble rail by construction
+    // (e.g. SDSS DL = ΛCDM × z, 2MRS d = cz / 70) and would lock the
+    // slope onto whatever H₀ those catalogs assumed.
+    const directData = data.filter((d) => d.distanceTag === "direct");
+    const extrapolatedCount = data.length - directData.length;
+    if (directData.length >= 2) {
       const fit = fitHubbleSlope(
-        data.map((d) => ({
+        directData.map((d) => ({
           d: d.plottedDistanceMpc,
           v: d.plottedVelocityKmS,
         })),
@@ -409,11 +422,15 @@ export class HubbleDiagram {
           .attr("y1", yScale(0))
           .attr("x2", xScale(xEnd))
           .attr("y2", yScale(yEnd));
-        this.renderH0Readout(fit.h0, fit.rms, fit.n);
+        this.renderH0Readout(fit.h0, fit.rms, fit.n, extrapolatedCount);
       }
+    } else if (data.length === 0) {
+      this.h0Readout.innerHTML = `<span class="hint">Add galaxies to see your measured Hubble constant.</span>`;
     } else {
-      this.h0Readout.innerHTML = `<span class="hint">Add at least two galaxies to see your measured Hubble constant.</span>`;
+      this.h0Readout.innerHTML =
+        `<span class="hint">Add at least two galaxies with directly-measured distances to see your measured Hubble constant. Redshift-extrapolated points are plotted but excluded from the fit.</span>`;
     }
+    this.renderLegend();
 
     // Reference line at the published H₀ — only when explicitly
     // toggled on. Otherwise the student finds the value themselves
@@ -451,7 +468,7 @@ export class HubbleDiagram {
       .enter()
       .append("circle")
       .attr("class", (d) =>
-        `galaxy${d.isAnomaly ? " anomaly" : ""}${
+        `galaxy tag-${d.distanceTag}${d.isAnomaly ? " anomaly" : ""}${
           d.id === this.selectedId ? " selected" : ""
         }`,
       )
@@ -463,15 +480,24 @@ export class HubbleDiagram {
     dots.append("title").text((d) => `${d.name}\n${d.claimToFame}`);
   }
 
-  private renderH0Readout(h0: number, rms: number, n: number): void {
+  private renderH0Readout(
+    h0: number,
+    rms: number,
+    n: number,
+    extrapolatedCount: number,
+  ): void {
     // The "X% above/below the published value" line only appears when
     // the user has explicitly toggled the published-H₀ reference line
     // on. Otherwise we show only the raw slope so the student isn't
     // told the answer before they've measured it.
+    const exclusion =
+      extrapolatedCount > 0
+        ? ` &nbsp;<span class="hint">(${extrapolatedCount} extrapolated point${extrapolatedCount === 1 ? "" : "s"} excluded from fit)</span>`
+        : "";
     const slope = `<div>
         Your best-fit slope:
         <span class="h0-value">${h0.toFixed(1)} km/s/Mpc</span>
-        &nbsp;<span class="hint">(${n} galaxies, scatter ${rms.toFixed(0)} km/s)</span>
+        &nbsp;<span class="hint">(${n} direct galax${n === 1 ? "y" : "ies"}, scatter ${rms.toFixed(0)} km/s)</span>${exclusion}
       </div>`;
     if (!this.axes.showRefLine) {
       this.h0Readout.innerHTML = slope;
@@ -484,6 +510,50 @@ export class HubbleDiagram {
         Published value: ${H0_PUBLISHED_KM_S_MPC} km/s/Mpc — you're
         ${diffPct.toFixed(1)}% ${diff > 0 ? "above" : "below"}.
       </div>`;
+  }
+
+  private renderLegend(): void {
+    const directCount = this.galaxies.filter(
+      (g) => g.distanceTag === "direct",
+    ).length;
+    const extrapolatedCount = this.galaxies.length - directCount;
+    this.legend.innerHTML = `
+      <span class="legend-item">
+        <span class="legend-swatch tag-direct"></span>
+        Direct (${directCount})
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch tag-extrapolated"></span>
+        Extrapolated (${extrapolatedCount})
+      </span>
+      <button type="button" class="legend-help help-btn">what's this?</button>
+    `;
+    const helpBtn = this.legend.querySelector<HTMLButtonElement>(".legend-help");
+    helpBtn?.addEventListener("click", () => this.openMethodsHelp());
+  }
+
+  private openMethodsHelp(): void {
+    const { inner } = openModal("About these colours");
+    inner.innerHTML = `
+      <p>Galaxies on this chart come from two kinds of distance
+      measurement.</p>
+      <p><strong style="color: var(--accent-good)">Direct</strong>
+      distances are measured from something physical inside the
+      galaxy — pulsating Cepheid stars, the brightness step at the
+      tip of the red giant branch, exploding Type Ia supernovae, or
+      the way light spreads out from the galaxy as a whole. Each
+      method gives an independent estimate, so when you plot them
+      they show real scatter around Hubble's law.</p>
+      <p><strong style="color: var(--accent-2)">Extrapolated</strong>
+      distances aren't really measured at all — they're calculated
+      from the galaxy's redshift, assuming Hubble's law in reverse.
+      They're useful for filling in regions of the sky where no
+      direct measurement exists, but they will always sit exactly
+      on a straight line because that's how they were computed, so
+      they don't help us prove Hubble's law on this graph. We can
+      plot them, but we don't use them in our calculation of our
+      best-fit line.</p>
+    `;
   }
 }
 
