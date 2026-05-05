@@ -554,7 +554,7 @@ h2 {
   align-items: center;
   gap: 0.5rem;
   padding: 0.55rem 0.8rem;
-  color: var(--accent);
+  color: var(--accent-2);
   font-weight: 600;
   font-size: 0.95rem;
   user-select: none;
@@ -567,7 +567,7 @@ h2 {
   transition: transform 0.15s ease;
 }
 .info-section[open] > summary::before { transform: rotate(90deg); }
-.info-section > summary:hover { background: rgba(255, 209, 102, 0.08); }
+.info-section > summary:hover { background: rgba(108, 196, 255, 0.08); }
 .info-section-body {
   padding: 0.5rem 0.9rem 0.7rem;
   border-top: 1px solid var(--grid);
