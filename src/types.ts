@@ -13,6 +13,15 @@ export type GalaxyType =
   | "deep-field"
   | "merger";
 
+// Whether the galaxy's distance was measured by a redshift-independent
+// method (Cepheid PL, TRGB, SBF, Tully-Fisher, SN Ia, fundamental plane,
+// parallax) or extrapolated from its redshift via cz / H₀ or a
+// catalog-fitted luminosity distance assuming a cosmology. Drives both
+// visual styling (colour on the sky map and Hubble diagram) and best-fit
+// inclusion: extrapolated points always sit on a perfect Hubble rail by
+// construction, so they're plotted but excluded from the slope fit.
+export type DistanceTag = "direct" | "extrapolated";
+
 // One Cepheid star inside a host galaxy. Source for SH0ES hosts is
 // VizieR J/ApJ/826/56/table4 (Riess+ 2016); for Local Group hosts it's
 // the bundled OGLE-IV catalog. Period in days; magnitude is whatever
@@ -89,6 +98,11 @@ export interface Galaxy {
   wikipedia?: string; // en.wikipedia.org page slug
   isAnomaly?: boolean;
   anomalyExplanation?: string;
+  distanceTag: DistanceTag;
+  // Free-form, human-readable description of how the distance was
+  // measured, surfaced in the data panel (e.g. "Cepheid period–luminosity
+  // (Cosmicflows-3)" or "Redshift × Hubble's law (2MASS Redshift Survey)").
+  distanceMethodLabel: string;
 }
 
 // A galaxy that's been added to the Hubble chart, with a "source of

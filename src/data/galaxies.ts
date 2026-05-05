@@ -1,4 +1,4 @@
-import type { Galaxy } from "../types";
+import type { DistanceTag, Galaxy } from "../types";
 import { C_KM_S } from "./derive";
 
 // Curated galaxy seed list. Every entry was checked for visibility on
@@ -22,7 +22,70 @@ function v(z: number): number {
 
 const noCaps = { cepheidPL: false, lightCurves: false, sdssSpectrum: false };
 
-export const CURATED_GALAXIES: Galaxy[] = [
+// IDs whose curated distance is a redshift-derived value rather than an
+// independent measurement. These plot as "extrapolated" and are excluded
+// from the best-fit slope, since they always lie on a Hubble rail by
+// construction. Everything else is "direct" (Cepheid PL, TRGB, SBF, SN Ia,
+// fundamental plane, eclipsing binary, maser geometry, parallax).
+const EXTRAPOLATED_IDS = new Set([
+  "ngc7319",      // Stephan's Quintet — distance is z·c/H₀
+  "ngc7317",      // Stephan's Quintet — distance is z·c/H₀
+  "3c273",        // quasar — distance from cosmological redshift
+  "mrk421",       // blazar — distance from cosmological redshift
+  "hdfn_4_555",   // deep-field — distance from ΛCDM + spectroscopic z
+  "hudf_z3",      // deep-field — distance from ΛCDM + spectroscopic z
+]);
+
+// Per-id method labels for galaxies whose distance came from a notable
+// technique. Anything not listed falls back to a generic label keyed off
+// the distance tag.
+const METHOD_LABELS: Record<string, string> = {
+  ngc4258: "VLBI water-maser geometry (gold-standard distance anchor)",
+  m31: "Eclipsing-binary + Cepheid period–luminosity",
+  m33: "Eclipsing-binary + Cepheid period–luminosity",
+  lmc: "Eclipsing-binary + Cepheid period–luminosity",
+  smc: "Eclipsing-binary + Cepheid period–luminosity",
+  ic1613: "Cepheid period–luminosity (TRGB-cross-checked)",
+  ngc6822: "Cepheid period–luminosity",
+  m81: "Cepheid period–luminosity",
+  m82: "TRGB (tip of the red giant branch)",
+  centaurus_a: "TRGB (tip of the red giant branch)",
+  m51: "Surface-brightness fluctuations (SBF)",
+  m104: "Surface-brightness fluctuations (SBF)",
+  m87: "Surface-brightness fluctuations (SBF)",
+  ngc891: "Tully-Fisher",
+  ngc4565: "Tully-Fisher",
+  ngc5907: "Tully-Fisher",
+  ngc7320: "Tully-Fisher",
+  ngc1068: "TRGB / Tully-Fisher composite",
+  ngc1015: "Cepheid period–luminosity (SH0ES)",
+  ngc1309: "Cepheid period–luminosity (SH0ES)",
+  ngc1365: "Cepheid period–luminosity (SH0ES)",
+  ngc3370: "Cepheid period–luminosity (SH0ES)",
+  ngc3627: "Cepheid period–luminosity (SH0ES)",
+  ngc4038: "Cepheid period–luminosity (SH0ES)",
+  ngc4424: "Cepheid period–luminosity (SH0ES)",
+  ngc4536: "Cepheid period–luminosity (SH0ES)",
+  ngc4639: "Cepheid period–luminosity (SH0ES)",
+  ngc5584: "Cepheid period–luminosity (SH0ES)",
+  ngc7250: "Cepheid period–luminosity (SH0ES)",
+  ugc9391: "Cepheid period–luminosity (SH0ES)",
+  ngc7319: "Redshift × Hubble's law (Stephan's Quintet)",
+  ngc7317: "Redshift × Hubble's law (Stephan's Quintet)",
+  "3c273": "Redshift × cosmological model (quasar at z = 0.158)",
+  mrk421: "Redshift × Hubble's law (blazar)",
+  hdfn_4_555: "Redshift × ΛCDM cosmology (Hubble Deep Field North)",
+  hudf_z3: "Redshift × ΛCDM cosmology (Hubble Ultra Deep Field)",
+};
+
+const DEFAULT_DIRECT_LABEL =
+  "Redshift-independent (textbook value)";
+const DEFAULT_EXTRAPOLATED_LABEL =
+  "Redshift × Hubble's law (no direct measurement)";
+
+type SeedGalaxy = Omit<Galaxy, "distanceTag" | "distanceMethodLabel">;
+
+const CURATED_SEED: SeedGalaxy[] = [
   // ============================================================
   //  Local Group + nearby named galaxies (DSS2 obvious)
   // ============================================================
@@ -674,6 +737,26 @@ export const CURATED_GALAXIES: Galaxy[] = [
       "Bright in extreme energies (X-rays, gamma rays) but a fairly ordinary galaxy at visible wavelengths — a reminder that 'bright' depends on what kind of light you're looking at.",
   },
 ];
+
+function tagFor(id: string): DistanceTag {
+  return EXTRAPOLATED_IDS.has(id) ? "extrapolated" : "direct";
+}
+
+function methodLabelFor(id: string, tag: DistanceTag): string {
+  return (
+    METHOD_LABELS[id] ??
+    (tag === "direct" ? DEFAULT_DIRECT_LABEL : DEFAULT_EXTRAPOLATED_LABEL)
+  );
+}
+
+export const CURATED_GALAXIES: Galaxy[] = CURATED_SEED.map((g) => {
+  const distanceTag = tagFor(g.id);
+  return {
+    ...g,
+    distanceTag,
+    distanceMethodLabel: methodLabelFor(g.id, distanceTag),
+  };
+});
 
 export function findGalaxyById(id: string): Galaxy | undefined {
   return CURATED_GALAXIES.find((g) => g.id === id);

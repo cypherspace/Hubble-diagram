@@ -85,6 +85,20 @@ export class DataPanel {
       headlineStat("Recession velocity", `${galaxy.vRecKmS} km/s`),
     );
 
+    // How that distance was actually measured. Two-line block so the
+    // tag chip and the long-form method label both fit comfortably.
+    const methodRow = document.createElement("div");
+    methodRow.className = `method-row tag-${galaxy.distanceTag}`;
+    const tagLabel = galaxy.distanceTag === "direct" ? "Direct" : "Extrapolated";
+    methodRow.innerHTML = `
+      <div class="method-label">Distance method</div>
+      <div class="method-value">
+        <span class="tag-pill tag-${galaxy.distanceTag}">${tagLabel}</span>
+        <span class="method-detail">${galaxy.distanceMethodLabel}</span>
+      </div>
+    `;
+    wrap.appendChild(methodRow);
+
     // Galaxy type — secondary, smaller.
     const typeRow = document.createElement("div");
     typeRow.className = "secondary-row";

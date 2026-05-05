@@ -4,6 +4,7 @@ import { C_KM_S } from "./data/derive";
 import {
   searchGalaxies,
   searchedGalaxyToGalaxy,
+  type SearchedGalaxy,
 } from "./data/galaxySearch";
 import { VizierError } from "./data/vizier";
 import { HubbleDiagram } from "./ui/hubbleDiagram";
@@ -76,10 +77,7 @@ class App {
     this.diagram = new HubbleDiagram({
       container: diagramEl,
       axes: this.axes,
-      onPointClick: (g) => {
-        this.select(g.id);
-        this.skyViewer.gotoRaDec(g.ra, g.dec);
-      },
+      onPointClick: (g) => this.select(g.id),
     });
 
     this.controls = new Controls(controlsEl, this.axes, {
@@ -99,10 +97,7 @@ class App {
       initialTarget: "Andromeda",
       initialSurvey: "P/DSS2/color",
       initialFov: 30,
-      onGalaxyClick: (g) => {
-        this.select(g.id);
-        this.skyViewer.gotoRaDec(g.ra, g.dec);
-      },
+      onGalaxyClick: (g) => this.select(g.id),
       onCandidateClick: (g) => this.commitCandidate(g),
       onStatus: (msg) => {
         this.skyStatusEl.textContent = msg;
@@ -345,6 +340,11 @@ class App {
     const plotted = this.plotted.get(id) ?? null;
     this.dataPanel.show(g, plotted);
     this.diagram.setSelected(id);
+    // Re-centre the sky map on the selected galaxy. Single source of
+    // truth for "user picked a galaxy" — diagram clicks, sky-marker
+    // clicks, and curated-list clicks all funnel through here, so the
+    // three entry points behave identically.
+    void this.skyViewer.gotoRaDec(g.ra, g.dec);
   }
 
   private addCurated(galaxy: Galaxy): void {
@@ -422,9 +422,9 @@ class App {
       return;
     }
     const [ra, dec] = center;
-    // Cap the search radius — the SDSS galaxy catalog gets dense fast,
-    // and the cone-search query slows down for big radii. 1.5° is
-    // plenty for a single screenful of galaxies.
+    // Cap the search radius — catalog cone-searches get dense fast and
+    // VizieR slows down at larger radii. 1.5° is plenty for a single
+    // screenful of galaxies.
     const radius = Math.min(Math.max(fov[0], fov[1]) / 2, 1.5);
     this.inflightSearch?.abort();
     const ctrl = new AbortController();
@@ -442,16 +442,18 @@ class App {
       this.searchResults.clear();
       for (const g of candidates) this.searchResults.set(g.id, g);
       await this.skyViewer.setCandidates(candidates);
-      const sourceLabel =
-        result.sourceUsed === "sdss"
-          ? "from the Sloan Digital Sky Survey"
-          : result.sourceUsed === "2mrs"
-            ? "from the 2MASS Redshift Survey"
-            : "";
+      const sourcesLabel = formatSourceList(result.sourcesUsed);
       this.skyStatusEl.textContent =
         candidates.length > 0
-          ? `Found ${candidates.length} galaxies ${sourceLabel}. Click a marker to add one, or "Add all".`
-          : "No galaxies found in that region. Try panning to a different patch — coverage is best in the northern hemisphere away from the Milky Way.";
+          ? `Found ${candidates.length} galaxies ${sourcesLabel}. Click a marker to add one, or "Add all".`
+          : "No galaxies found in that region. Try panning to a different patch.";
+
+      // Background CF4 enrichment: when CF4 lands, merge any new direct
+      // distances in. CF4 is fired in parallel with CF3, so this often
+      // resolves within a second of the foreground search completing.
+      if (result.cf4Pending) {
+        void this.mergeCf4Background(result.cf4Pending, ctrl);
+      }
     } catch (e) {
       if (ctrl.signal.aborted) return;
       const msg =
@@ -463,6 +465,55 @@ class App {
       this.skyStatusEl.textContent = `Search failed: ${msg}`;
     } finally {
       if (this.inflightSearch === ctrl) this.inflightSearch = null;
+    }
+  }
+
+  private async mergeCf4Background(
+    pending: Promise<SearchedGalaxy[]>,
+    ctrl: AbortController,
+  ): Promise<void> {
+    this.skyStatusEl.textContent = `${this.skyStatusEl.textContent} (Looking for more direct distances in Cosmicflows-4…)`;
+    let cf4Rows: SearchedGalaxy[];
+    try {
+      cf4Rows = await pending;
+    } catch {
+      return;
+    }
+    if (ctrl.signal.aborted) return;
+    if (cf4Rows.length === 0) {
+      this.skyStatusEl.textContent =
+        this.skyStatusEl.textContent.replace(
+          / \(Looking for more direct distances in Cosmicflows-4…\)$/,
+          "",
+        );
+      return;
+    }
+    let added = 0;
+    for (const row of cf4Rows) {
+      const g = searchedGalaxyToGalaxy(row);
+      if (this.plotted.has(g.id) || this.searchResults.has(g.id)) continue;
+      // Sky-position dedup against existing search results so we don't
+      // double up the same galaxy under a different catalog id.
+      const dup = Array.from(this.searchResults.values()).some(
+        (existing) =>
+          Math.abs(existing.ra - g.ra) < 1e-3 &&
+          Math.abs(existing.dec - g.dec) < 1e-3,
+      );
+      if (dup) continue;
+      this.searchResults.set(g.id, g);
+      added++;
+    }
+    if (added > 0) {
+      await this.skyViewer.setCandidates(
+        Array.from(this.searchResults.values()),
+      );
+      this.skyStatusEl.textContent = `Cosmicflows-4 added ${added} more direct distance${added === 1 ? "" : "s"}.`;
+    } else {
+      this.skyStatusEl.textContent =
+        this.skyStatusEl.textContent.replace(
+          / \(Looking for more direct distances in Cosmicflows-4…\)$/,
+          "",
+        );
     }
   }
 
@@ -480,7 +531,7 @@ class App {
   private addAllCandidates(): void {
     const candidates = this.skyViewer.getCandidates();
     if (candidates.length === 0) {
-      this.skyStatusEl.textContent = "No search results to add. Press Search SDSS first.";
+      this.skyStatusEl.textContent = "No search results to add. Press Search catalogs first.";
       return;
     }
     let added = 0;
@@ -491,7 +542,7 @@ class App {
       }
     }
     this.skyViewer.clearCandidates();
-    this.skyStatusEl.textContent = `Added ${added} SDSS galaxies from search results.`;
+    this.skyStatusEl.textContent = `Added ${added} galaxies from search results.`;
   }
 
   private save(name: string): void {
@@ -582,6 +633,20 @@ function mustGet(id: string): HTMLElement {
 
 function clamp(v: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, v));
+}
+
+function formatSourceList(sources: ("cf3" | "cf4" | "sdss" | "2mrs")[]): string {
+  const labels: Record<string, string> = {
+    cf3: "Cosmicflows-3",
+    cf4: "Cosmicflows-4",
+    sdss: "Sloan Digital Sky Survey",
+    "2mrs": "2MASS Redshift Survey",
+  };
+  const names = sources.map((s) => labels[s]).filter(Boolean);
+  if (names.length === 0) return "";
+  if (names.length === 1) return `from ${names[0]}`;
+  if (names.length === 2) return `from ${names[0]} + ${names[1]}`;
+  return `from ${names.slice(0, -1).join(", ")} + ${names[names.length - 1]}`;
 }
 
 new App();

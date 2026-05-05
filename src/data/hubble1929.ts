@@ -89,6 +89,8 @@ export function hubble1929GalaxyRecord(g: Hubble1929Galaxy): Galaxy {
     vRecKmS: g.hubbleVelocityKmS,
     capabilities: { cepheidPL: false, lightCurves: false, sdssSpectrum: false },
     claimToFame: `Plotted by Hubble in 1929 at d = ${g.hubbleDistanceMpc} Mpc, v = ${g.hubbleVelocityKmS} km/s. Modern values: d = ${g.modernDistanceMpc} Mpc, v = ${(g.modernZ * C_KM_S).toFixed(0)} km/s.`,
+    distanceTag: "direct",
+    distanceMethodLabel: "Cepheid period–luminosity (Hubble 1929)",
   };
 }
 
@@ -111,5 +113,7 @@ export function hubble1929ModernRecord(g: Hubble1929Galaxy): Galaxy {
     vRecKmS: v,
     capabilities: { cepheidPL: false, lightCurves: false, sdssSpectrum: false },
     claimToFame: `Modern measurement of a galaxy from Hubble's 1929 paper. d = ${g.modernDistanceMpc} Mpc, v = ${v} km/s.`,
+    distanceTag: "direct",
+    distanceMethodLabel: "Modern Cepheid / TRGB / SBF (textbook value)",
   };
 }

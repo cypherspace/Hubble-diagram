@@ -392,9 +392,93 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .hubble-svg .best-fit-line { stroke: var(--accent-2); stroke-width: 2; opacity: 0.85; }
 .hubble-svg .ref-line { stroke: var(--muted); stroke-dasharray: 5,4; opacity: 0.6; }
 .hubble-svg .ref-label { fill: var(--muted); font-size: 11px; }
-.hubble-svg circle.galaxy { fill: var(--accent-2); stroke: transparent; stroke-width: 2; }
+.hubble-svg circle.galaxy { stroke: transparent; stroke-width: 2; }
+.hubble-svg circle.galaxy.tag-direct       { fill: var(--accent-good); }
+.hubble-svg circle.galaxy.tag-extrapolated { fill: var(--accent-2); }
+/* Anomaly takes precedence over the tag colour — these galaxies are
+   pedagogically interesting precisely because they don't follow the
+   line, so we want the warning colour to dominate. */
 .hubble-svg circle.galaxy.anomaly { fill: var(--warn); }
 .hubble-svg circle.galaxy.selected { stroke: #ffffff; }
+
+/* --- Diagram legend (Direct / Extrapolated / what's this?) --- */
+.diagram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 0 0.2rem 0.4rem;
+}
+.diagram-legend .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.diagram-legend .legend-swatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.diagram-legend .legend-swatch.tag-direct       { background: var(--accent-good); }
+.diagram-legend .legend-swatch.tag-extrapolated { background: var(--accent-2); }
+.diagram-legend .legend-help {
+  background: transparent;
+  border: none;
+  color: var(--accent-2);
+  text-decoration: underline;
+  padding: 0.1rem 0.25rem;
+  font-size: 0.78rem;
+  cursor: help;
+  font-family: inherit;
+}
+.diagram-legend .legend-help:hover { color: var(--accent); background: transparent; }
+
+/* --- Distance-method row in the data panel --- */
+.method-row {
+  background: var(--panel-2);
+  border-left: 3px solid var(--accent-good);
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  margin: 0.4rem 0 0.2rem;
+}
+.method-row.tag-extrapolated { border-left-color: var(--accent-2); }
+.method-row .method-label {
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.method-row .method-value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+}
+.method-row .method-detail { color: var(--fg); }
+.tag-pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.tag-pill.tag-direct {
+  background: rgba(155, 231, 196, 0.15);
+  color: var(--accent-good);
+  border: 1px solid var(--accent-good);
+}
+.tag-pill.tag-extrapolated {
+  background: rgba(108, 196, 255, 0.15);
+  color: var(--accent-2);
+  border: 1px solid var(--accent-2);
+}
 
 /* Hover affordance on the axis tick areas — so the user knows they
    can mouse-down there to "hold" that axis for a single-axis zoom. */

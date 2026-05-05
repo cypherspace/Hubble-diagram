@@ -1,4 +1,4 @@
-import type { Galaxy } from "../types";
+import type { DistanceTag, Galaxy } from "../types";
 import type { GalaxySet } from "../data/galaxies";
 
 declare global {
@@ -11,7 +11,23 @@ interface AladinSource {
   data: Record<string, unknown>;
   ra?: number;
   dec?: number;
+  // Aladin Lite sets these to the source's screen-space pixel position
+  // before invoking the custom shape draw callback.
+  x?: number;
+  y?: number;
 }
+
+// Inline-fillable CSS colour tokens for the two distance tags. Kept
+// in sync with --accent-good / --accent-2 in src/style.css; canvas
+// drawing can't read CSS variables, so we duplicate them here.
+const TAG_COLOR: Record<DistanceTag, string> = {
+  direct: "#9be7c4",        // --accent-good
+  extrapolated: "#6cc4ff",  // --accent-2
+};
+
+// Bright magenta for catalog-search candidates that haven't been
+// tagged. Kept as a fallback so a misconfigured row still renders.
+const CANDIDATE_FALLBACK_COLOR = "#ff4ec9";
 
 interface AladinCatalog {
   addSources: (sources: AladinSource[]) => void;
@@ -83,6 +99,87 @@ function buildBadgeText(galaxy: Galaxy): string {
   return parts.join(" ");
 }
 
+type ShapeKind = "circle" | "square" | "rhomb" | "triangle" | "cross" | "plus";
+
+// Custom Aladin-Lite shape drawer. Reads per-source data attributes
+// (`fillColor`, `tagColor`, `shapeKind`, `radius`) and renders a
+// filled glyph plus an optional 2-px tag-coloured ring. Used for both
+// curated overlays (where the inner colour is the set's `markerColor`)
+// and catalog-search candidates (where the inner colour is the tag
+// colour and there's no ring).
+function drawTaggedSource(
+  source: AladinSource,
+  ctx: CanvasRenderingContext2D,
+): void {
+  const x = source.x;
+  const y = source.y;
+  if (typeof x !== "number" || typeof y !== "number") return;
+  const d = source.data ?? {};
+  const fill = (d.fillColor as string) || CANDIDATE_FALLBACK_COLOR;
+  const tag = d.tagColor as string | undefined;
+  const shape = ((d.shapeKind as string) || "circle") as ShapeKind;
+  const r = typeof d.radius === "number" ? d.radius : 6;
+  ctx.save();
+  ctx.fillStyle = fill;
+  drawShapePath(ctx, x, y, r, shape);
+  ctx.fill();
+  if (tag) {
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = tag;
+    drawShapePath(ctx, x, y, r + 2, shape);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawShapePath(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  r: number,
+  shape: ShapeKind,
+): void {
+  ctx.beginPath();
+  switch (shape) {
+    case "circle":
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      break;
+    case "square":
+      ctx.rect(cx - r, cy - r, r * 2, r * 2);
+      break;
+    case "rhomb":
+      ctx.moveTo(cx, cy - r);
+      ctx.lineTo(cx + r, cy);
+      ctx.lineTo(cx, cy + r);
+      ctx.lineTo(cx - r, cy);
+      ctx.closePath();
+      break;
+    case "triangle":
+      ctx.moveTo(cx, cy - r);
+      ctx.lineTo(cx + r, cy + r);
+      ctx.lineTo(cx - r, cy + r);
+      ctx.closePath();
+      break;
+    case "cross":
+      // Diagonal cross — same outline used to fill or stroke.
+      ctx.moveTo(cx - r, cy - r);
+      ctx.lineTo(cx + r, cy + r);
+      ctx.moveTo(cx + r, cy - r);
+      ctx.lineTo(cx - r, cy + r);
+      break;
+    case "plus":
+      ctx.moveTo(cx, cy - r);
+      ctx.lineTo(cx, cy + r);
+      ctx.moveTo(cx - r, cy);
+      ctx.lineTo(cx + r, cy);
+      break;
+  }
+}
+
+function shapeKindFor(set: GalaxySet): ShapeKind {
+  return set.markerShape as ShapeKind;
+}
+
 export class SkyViewer {
   private aladin?: AladinInstance;
   private setCatalogs = new Map<string, AladinCatalog>();
@@ -124,12 +221,13 @@ export class SkyViewer {
     });
 
     this.candidateCatalog = A.catalog({
-      name: "SDSS search results",
-      // Bright magenta — distinct from yellow anomaly markers and the
-      // yellowish galaxy backgrounds on PanSTARRS imagery.
+      name: "Catalog search results",
       sourceSize: 14,
-      color: "#ff4ec9",
-      shape: "plus",
+      // `color` and `shape` are still set so any Aladin code path that
+      // doesn't consult our custom drawer still renders something
+      // sensible. The drawer below overrides per-source.
+      color: CANDIDATE_FALLBACK_COLOR,
+      shape: drawTaggedSource,
     });
     this.aladin.addCatalog(this.candidateCatalog);
 
@@ -172,11 +270,12 @@ export class SkyViewer {
       for (const g of allGalaxies) this.galaxiesById.set(g.id, g);
       for (const set of sets) {
         if (this.setCatalogs.has(set.id)) continue;
+        const shape = shapeKindFor(set);
         const cat = window.A.catalog({
           name: set.label,
           sourceSize: 16,
           color: set.markerColor,
-          shape: set.markerShape,
+          shape: drawTaggedSource,
           displayLabel: true,
           labelColumn: "label",
           labelColor: set.markerColor,
@@ -197,6 +296,14 @@ export class SkyViewer {
               name: g.name,
               label: labelText,
               type: g.type,
+              // Inner glyph in the set's category colour; outer ring
+              // in the tag colour so the user can tell at a glance
+              // whether the curated distance is a real measurement
+              // or a redshift extrapolation.
+              fillColor: set.markerColor,
+              tagColor: TAG_COLOR[g.distanceTag],
+              shapeKind: shape,
+              radius: 6,
             }),
           );
         }
@@ -229,6 +336,13 @@ export class SkyViewer {
       return window.A!.source(g.ra, g.dec, {
         id: g.id,
         name: g.name,
+        // Catalog-search candidates use the tag colour as the fill
+        // (no inner-disc/category colour, since they don't belong to
+        // a curated set). No tag-coloured ring — the fill alone tells
+        // the story.
+        fillColor: TAG_COLOR[g.distanceTag],
+        shapeKind: "circle",
+        radius: 6,
       });
     });
     this.candidateCatalog.removeAll();
