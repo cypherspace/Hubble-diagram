@@ -54,6 +54,16 @@ interface AladinInstance {
     event: string,
     handler: (...args: unknown[]) => void,
   ) => void;
+  // Internal hooks Aladin Lite v3 exposes for clearing the selection
+  // highlight that's drawn over a clicked Source. Optional because
+  // older v3 builds don't all expose them under the same names; the
+  // skyViewer probes whichever is available before falling back.
+  view?: {
+    unselectObjects?: () => void;
+    closeContextMenu?: () => void;
+    popoverDiv?: HTMLElement;
+  };
+  selectObjects?: (sources: AladinSource[] | null) => void;
 }
 
 interface AladinNamespace {
@@ -127,12 +137,7 @@ export class SkyViewer {
       fov: this.opts.initialFov ?? 5,
       target: this.opts.initialTarget ?? "Andromeda",
       cooFrame: "ICRSd",
-      // Reticle off — every galaxy click recentres the sky now, so a
-      // visible central crosshair would land directly on top of the
-      // clicked galaxy and read as "a green cross at the last place I
-      // clicked." The Aladin built-in zoom controls and the user's
-      // mouse position are sufficient to convey "where am I looking."
-      showReticle: false,
+      showReticle: true,
       showZoomControl: true,
       showFullscreenControl: true,
       showLayersControl: false,
@@ -143,17 +148,24 @@ export class SkyViewer {
       showProjectionControl: false,
     });
 
+    // `onClick: () => {}` suppresses Aladin's default click visual
+    // (the persistent green/cyan selection highlight that sits over
+    // the clicked source). Our own `objectClicked` event handler
+    // below still receives the click and dispatches it.
+    const noopClick = () => {};
     this.candidateCatalogDirect = A.catalog({
       name: "Search results — direct distance",
       sourceSize: 14,
       color: TAG_COLOR.direct,
       shape: "plus",
+      onClick: noopClick,
     });
     this.candidateCatalogExtrapolated = A.catalog({
       name: "Search results — extrapolated",
       sourceSize: 14,
       color: TAG_COLOR.extrapolated,
       shape: "plus",
+      onClick: noopClick,
     });
     this.aladin.addCatalog(this.candidateCatalogDirect);
     this.aladin.addCatalog(this.candidateCatalogExtrapolated);
@@ -166,10 +178,16 @@ export class SkyViewer {
       const candidate = this.candidatesById.get(id);
       if (candidate) {
         this.opts.onCandidateClick?.(candidate);
-        return;
+      } else {
+        const g = this.galaxiesById.get(id);
+        if (g) this.opts.onGalaxyClick?.(g);
       }
-      const g = this.galaxiesById.get(id);
-      if (g) this.opts.onGalaxyClick?.(g);
+      // Belt-and-braces: even with `onClick: noopClick` on every
+      // catalog, some Aladin Lite v3 builds still mark the source as
+      // selected and draw a cross-shaped highlight on it. Clear that
+      // on the next frame (so we don't fight Aladin's own paint),
+      // probing whichever deselect API the loaded build exposes.
+      requestAnimationFrame(() => this.clearAladinSelection());
     });
 
     const setFullscreen = (on: boolean) => {
@@ -191,6 +209,20 @@ export class SkyViewer {
     );
   }
 
+  private clearAladinSelection(): void {
+    if (!this.aladin) return;
+    try {
+      this.aladin.view?.unselectObjects?.();
+    } catch {
+      /* method may not exist on older Aladin Lite v3 builds */
+    }
+    try {
+      this.aladin.selectObjects?.(null);
+    } catch {
+      /* same */
+    }
+  }
+
   registerSets(sets: GalaxySet[], allGalaxies: Galaxy[]): Promise<void> {
     return this.ready.then(() => {
       if (!this.aladin || !window.A) return;
@@ -206,6 +238,7 @@ export class SkyViewer {
           labelColumn: "label",
           labelColor: set.markerColor,
           labelFont: "11px system-ui, sans-serif",
+          onClick: () => {},
         });
         this.aladin.addCatalog(cat);
         this.setCatalogs.set(set.id, cat);
